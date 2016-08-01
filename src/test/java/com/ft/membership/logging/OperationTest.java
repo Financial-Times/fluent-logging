@@ -40,7 +40,15 @@ public class OperationTest {
 
         resultOperation("simple_result_operation").started(this).wasSuccessful().log(mockLogger);
 
-        verify(mockLogger).info("operation=\"simple_result_operation\" outcome=\"success\"");
+        verify(mockLogger).info(Mockito.matches("operation=\"simple_result_operation\" outcome=\"success\" timeToComplete=\"\\d*\""));
+    }
+
+    @Test
+    public void should_log_with_time_to_complete() throws Exception {
+
+        operation("simple_with_time").withTimeToComplete().started(this).wasSuccessful().log(mockLogger);
+
+        verify(mockLogger).info(Mockito.matches("operation=\"simple_with_time\" outcome=\"success\" timeToComplete=\"\\d*\""));
     }
 
     @Test

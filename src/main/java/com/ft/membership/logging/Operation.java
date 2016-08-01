@@ -32,9 +32,10 @@ public class Operation implements AutoCloseable {
 
     public static class OperationBuilder extends Parameters {
 
+        public static final String TIME_TO_COMPLETE = "timeToComplete";
         private final String operationName;
 
-        public OperationBuilder( final String operationName){
+        public OperationBuilder(final String operationName){
             checkNotNull(operationName, "require operationName");
             this.operationName = operationName;
         }
@@ -53,6 +54,11 @@ public class Operation implements AutoCloseable {
             return this;
         }
 
+        public OperationBuilder withTimeToComplete() {
+            put(TIME_TO_COMPLETE, new TimeToComplete(System.currentTimeMillis()));
+            return this;
+        }
+
         public Operation started(final Object actorOrLogger) {
             final Operation operation = new Operation(operationName, actorOrLogger, getParameters());
             new LogFormatter(actorOrLogger).logInfo(operation);
@@ -68,6 +74,8 @@ public class Operation implements AutoCloseable {
 
         @Override
         public Operation started(final Object actorOrLogger) {
+
+            super.with(TIME_TO_COMPLETE, new TimeToComplete(System.currentTimeMillis()));
             return new Operation(super.operationName, actorOrLogger, getParameters());
         }
     }

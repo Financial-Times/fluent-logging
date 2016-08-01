@@ -59,11 +59,11 @@ while
 
 Result Operation might log:
 
-    09:42:28.543 [main] INFO  Demo - operation=demo id="bd09f108-2a4d-4e47-8b9f-d20c19c0dad0" outcome=success result="{\"text\": \"hello world\"}"
+    09:42:28.543 [main] INFO  Demo - operation=demo id="bd09f108-2a4d-4e47-8b9f-d20c19c0dad0" outcome=success result="{\"text\": \"hello world\"}" timeToComplete=25
 
 on success, or:
 
-    10:02:13.484 [main] ERROR Demo - operation=demo id="bd09f108-2a4d-4e47-8b9f-d20c19c0dad0" outcome=failure exception="java.lang.ArithmeticException: / by zero"
+    10:02:13.484 [main] ERROR Demo - operation=demo id="bd09f108-2a4d-4e47-8b9f-d20c19c0dad0" outcome=failure exception="java.lang.ArithmeticException: / by zero" timeToComplete=2
     java.lang.ArithmeticException: / by zero
         at Demo.run(Demo.java:19) [test-classes/:na]
         at Demo.main(Demo.java:10) [test-classes/:na]
