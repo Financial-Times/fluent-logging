@@ -43,15 +43,45 @@ public class OperationTest {
         verifyNoMoreInteractions(mockLogger);
     }
 
-    @Test
-    public void only_log_success_for_initiated_operation() throws Exception {
+  @Test
+  public void log_start_and_success_for_json_layout() throws Exception {
 
-        operation("simple_result_operation").initiate(mockLogger).wasSuccessful().log();
+    operation("simple_success").jsonLayout().started(mockLogger).wasSuccessful().log();
 
-        verify(mockLogger,times(1)).isInfoEnabled();
-        verify(mockLogger).info("operation=\"simple_result_operation\" outcome=\"success\"");
-        verifyNoMoreInteractions(mockLogger);
-    }
+    verify(mockLogger, times(2)).isInfoEnabled();
+    verify(mockLogger).info("{\n" + "  \"operation\" : \"simple_success\"\n" + "}");
+    verify(mockLogger)
+        .info(
+            "{\n"
+                + "  \"operation\" : \"simple_success\",\n"
+                + "  \"outcome\" : \"success\"\n"
+                + "}");
+  }
+
+  @Test
+  public void only_log_success_for_initiated_operation() throws Exception {
+
+    operation("simple_result_operation").initiate(mockLogger).wasSuccessful().log();
+
+    verify(mockLogger, times(1)).isInfoEnabled();
+    verify(mockLogger).info("operation=\"simple_result_operation\" outcome=\"success\"");
+    verifyNoMoreInteractions(mockLogger);
+  }
+
+  @Test
+  public void only_log_success_for_initiated_operation_for_json_layout() throws Exception {
+
+    operation("simple_result_operation").jsonLayout().initiate(mockLogger).wasSuccessful().log();
+
+    verify(mockLogger, times(1)).isInfoEnabled();
+    verify(mockLogger)
+        .info(
+            "{\n"
+                + "  \"operation\" : \"simple_result_operation\",\n"
+                + "  \"outcome\" : \"success\"\n"
+                + "}");
+    verifyNoMoreInteractions(mockLogger);
+  }
 
     @Test
     public void log_success_with_start_params() throws Exception {
@@ -134,6 +164,25 @@ public class OperationTest {
                 );
     }
 
+  @Test
+  public void log_simple_failure_for_json_layout() throws Exception {
+
+    operation("simple_failure").jsonLayout()
+        .started(mockLogger)
+        .wasFailure()
+        .withMessage("boo hoo")
+        .log();
+
+    verify(mockLogger)
+        .error(
+            eq(
+                "{\n"
+                    + "  \"errorMessage\" : \"boo hoo\",\n"
+                    + "  \"operation\" : \"simple_failure\",\n"
+                    + "  \"outcome\" : \"failure\"\n"
+                    + "}"));
+  }
+
     @Test
     public void log_failure_with_exception() throws Exception {
 
@@ -144,6 +193,24 @@ public class OperationTest {
                 eq("operation=\"simple_failure\" outcome=\"failure\" errorMessage=\"bang!\" exception=\"java.lang.RuntimeException: bang!\""),
                 eq(ex)
         );
+    }
+
+    @Test
+    public void log_failure_with_exception_for_json_layout() throws Exception {
+
+        final Exception ex = new RuntimeException("bang!");
+        operation("simple_failure").jsonLayout().started(mockLogger).wasFailure().throwingException(ex).log();
+
+    verify(mockLogger)
+        .error(
+            eq(
+                "{\n"
+                    + "  \"exception\" : \"java.lang.RuntimeException: bang!\",\n"
+                    + "  \"errorMessage\" : \"bang!\",\n"
+                    + "  \"operation\" : \"simple_failure\",\n"
+                    + "  \"outcome\" : \"failure\"\n"
+                    + "}"),
+            eq(ex));
     }
 
     @Test
@@ -178,6 +245,35 @@ public class OperationTest {
     }
 
     @Test
+    public void log_failure_with_parameters_and_exception_for_json_layout() throws Exception {
+
+        final Exception ex = new RuntimeException("bang!");
+        operation("simple_failure").jsonLayout()
+                .with("x", 101)
+                .with("y","bat")
+                .started(mockLogger)
+                .wasFailure()
+                .throwingException(ex)
+                .withMessage("got a puncture")
+                .withDetail("tyre","right")
+                .log();
+
+    verify(mockLogger)
+        .error(
+            eq(
+                "{\n"
+                    + "  \"exception\" : \"java.lang.RuntimeException: bang!\",\n"
+                    + "  \"errorMessage\" : \"got a puncture\",\n"
+                    + "  \"x\" : 101,\n"
+                    + "  \"y\" : \"bat\",\n"
+                    + "  \"operation\" : \"simple_failure\",\n"
+                    + "  \"outcome\" : \"failure\",\n"
+                    + "  \"tyre\" : \"right\"\n"
+                    + "}"),
+            eq(ex));
+    }
+
+    @Test
     public void allow_null_values_for_parameters_and_yields() throws Exception {
         operation("allow_nulls")
                 .with("nullableInput", null)
@@ -190,6 +286,24 @@ public class OperationTest {
                 eq("operation=\"allow_nulls\" outcome=\"success\" nullableInput=null nullableResult=null")
         );
 
+    }
+
+    @Test
+    public void allow_null_values_for_parameters_and_yields_for_json_layout() throws Exception {
+        operation("allow_nulls").jsonLayout()
+                .with("nullableInput", null)
+                .started(mockLogger)
+                .wasSuccessful()
+                .yielding("nullableResult",null)
+                .log();
+
+    verify(mockLogger)
+        .info(
+            eq(
+                "{\n"
+                    + "  \"nullableInput\" : null,\n"
+                    + "  \"operation\" : \"allow_nulls\"\n"
+                    + "}"));
     }
 
     @Test(expected = NullPointerException.class)

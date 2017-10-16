@@ -1,10 +1,14 @@
 package com.ft.membership.logging;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.ft.membership.logging.LogFormatter.NameAndValue.nameAndValue;
@@ -15,8 +19,10 @@ class LogFormatter {
     private static final String OUTCOME_IS_FAILURE = "failure";
 
     private final Logger logger;
+    private final ObjectWriter objectWriter;
 
     LogFormatter(Object actorOrLogger) {
+        objectWriter = new ObjectMapper().writerWithDefaultPrettyPrinter();
         checkNotNull("require actor or logger");
         if (actorOrLogger instanceof Logger) {
             logger = (Logger) actorOrLogger;
@@ -30,7 +36,7 @@ class LogFormatter {
         addOperation(operation, msgParams);
         addOperationParameters(operation, msgParams);
         if (logger.isInfoEnabled()) {
-            logger.info(buildMsgString(msgParams));
+            logger.info(buildMsg(operation, msgParams));
         }
     }
 
@@ -43,9 +49,12 @@ class LogFormatter {
             addOutcome(OUTCOME_IS_SUCCESS, msgParams);
             addOperationParameters(operation, msgParams);
             addYield(yield, msgParams);
-
-            logger.info(buildMsgString(msgParams));
+            logger.info(buildMsg(operation, msgParams));
         }
+    }
+
+    private String buildMsg(Operation operation, final Collection<NameAndValue> msgParams) {
+        return operation.isJsonLayout() ? buildMsgJson(msgParams) : buildMsgString(msgParams);
     }
 
     void logDebug(Operation operation, Yield yield) {
@@ -57,8 +66,7 @@ class LogFormatter {
             addOutcome(OUTCOME_IS_SUCCESS, msgParams);
             addOperationParameters(operation, msgParams);
             addYield(yield, msgParams);
-
-            logger.debug(buildMsgString(msgParams));
+            logger.debug(buildMsg(operation, msgParams));
         }
     }
 
@@ -101,9 +109,9 @@ class LogFormatter {
         addFailureMessage(failure, msgParams);
         addOperationParameters(operation, msgParams);
         addFailureDetails(failure, msgParams);
-        return buildMsgString(msgParams);
+        return buildMsg(operation, msgParams);
     }
-    
+
     private String buildMsgString(final Collection<NameAndValue> msgParams) {
         final StringBuilder sb = new StringBuilder();
         boolean addSeperator = false;
@@ -115,6 +123,21 @@ class LogFormatter {
             addSeperator = true;
         }
         return sb.toString();
+    }
+
+    private String buildMsgJson(final Collection<NameAndValue> msgParams) {
+        Map<String, Object> map = new HashMap<>();
+        msgParams.stream().forEach(nameAndValue -> {
+            map.put(nameAndValue.getName(), nameAndValue.getValue());
+        });
+
+        String jsonResult = "";
+        try {
+            jsonResult = objectWriter.writeValueAsString(map);
+        } catch (JsonProcessingException e) {
+            logger.info("Failed to serialize the object to JSON");
+        }
+        return jsonResult;
     }
     
     private void addOperation(final Operation operation, final Collection<NameAndValue> msgParams) {
@@ -152,7 +175,6 @@ class LogFormatter {
     }
 
     static class NameAndValue {
-        
         private String name;
         private Object value;
 
@@ -171,6 +193,14 @@ class LogFormatter {
             } else {
                 return String.format("%s=%s", name, new ToStringWrapper(value).toString());
             }
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Object getValue() {
+            return value;
         }
         
     }
