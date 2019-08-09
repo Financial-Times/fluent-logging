@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 public class LogFormatter {
   private static final String OUTCOME_IS_SUCCESS = "success";
@@ -47,6 +48,60 @@ public class LogFormatter {
     addOperationParameters(operation, msgParams);
     if (logger.isInfoEnabled()) {
       logger.info(buildMsg(operation, msgParams, INFO));
+    }
+  }
+
+  void logStart(final OperationContext operation) {
+    final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
+    addOperationType(operation, msgParams);
+    addOperationParameters(operation, msgParams);
+    if (logger.isInfoEnabled()) {
+      logger.info(buildMsgString(msgParams));
+    }
+  }
+
+  void logSuccess(final OperationContext operation) {
+    log(operation, Outcome.Success, Level.INFO);
+  }
+
+  void log(final OperationContext operation, final Outcome outcome, final Level logLevel) {
+    final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
+    addOperationType(operation, msgParams);
+
+    if (outcome != null) {
+      addOutcome(outcome.getKey(), msgParams);
+    }
+    addOperationParameters(operation, msgParams);
+
+    switch (logLevel) {
+      case DEBUG:
+        if (logger.isDebugEnabled()) {
+          logger.debug(buildMsgString(msgParams));
+        }
+        break;
+      case ERROR:
+        if (logger.isErrorEnabled()) {
+          logger.error(buildMsgString(msgParams));
+        }
+        break;
+      default:
+        if (logger.isInfoEnabled()) {
+          logger.info(buildMsgString(msgParams));
+        }
+    }
+  }
+
+
+  void logInfo(final Operation operation, final Outcome outcome) {
+    operation.terminated();
+
+    if (logger.isInfoEnabled()) {
+      final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
+      addOperation(operation, msgParams);
+      addOutcome(outcome, msgParams);
+      addOperationParameters(operation, msgParams);
+
+      logger.info(buildMsgString(msgParams));
     }
   }
 
@@ -201,12 +256,25 @@ public class LogFormatter {
     msgParams.add(nameAndValue("operation", operation.getName()));
   }
 
-  private void addOperationParameters(
-      final Operation operation, final Collection<NameAndValue> msgParams) {
+  private void addOperationType(final OperationContext operation, final Collection<NameAndValue> msgParams) {
+    msgParams.add(nameAndValue(operation.getType(), operation.getName()));
+  }
+
+  private void addOperationParameters(final Operation operation,
+      final Collection<NameAndValue> msgParams) {
+    addParametersAsNamedValues(msgParams, operation.getParameters());
+  }
+
+  private void addOperationParameters(final OperationContext operation,
+      final Collection<NameAndValue> msgParams) {
     addParametersAsNamedValues(msgParams, operation.getParameters());
   }
 
   private void addOutcome(String outcome, final Collection<NameAndValue> msgParams) {
+    msgParams.add(nameAndValue("outcome", outcome));
+  }
+
+  private void addOutcome(Outcome outcome, final Collection<NameAndValue> msgParams) {
     msgParams.add(nameAndValue("outcome", outcome));
   }
 

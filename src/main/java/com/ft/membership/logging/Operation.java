@@ -52,6 +52,7 @@ import java.util.Optional;
  *     ...stacktrace...
  * </pre>
  */
+@Deprecated
 public class Operation implements AutoCloseable {
 
   private final String operationName;

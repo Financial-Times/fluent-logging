@@ -37,7 +37,14 @@
 
     <groupId>com.ft.membership</groupId>
     <artifactId>fluent-logging</artifactId>
-    <version>3.2.3</version>
+    <version>4.0.0-SNAPSHOT</version>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <properties>
         <target-jdk>1.8</target-jdk>
@@ -61,11 +68,6 @@
         <maven-source-plugin.version>3.0.0</maven-source-plugin.version>
         <maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
     </properties>
-
-    <prerequisites>
-        <!-- Versions < 3.2.3 vulnerable to MIM attack on maven central (SSL access to repo) -->
-        <maven>3.2.3</maven>
-    </prerequisites>
 
     <dependencies>
         <dependency>

@@ -2,6 +2,7 @@ package com.ft.membership.logging;
 
 import java.util.Map;
 
+@Deprecated
 public class Yield extends Parameters implements LoggingTerminal {
   private final Operation operation;
 

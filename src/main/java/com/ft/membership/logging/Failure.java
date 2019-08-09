@@ -4,6 +4,7 @@ import static com.ft.membership.logging.Preconditions.checkNotNull;
 
 import java.util.Map;
 
+@Deprecated
 public class Failure extends Parameters implements LoggingTerminal {
 
   private Operation operation;

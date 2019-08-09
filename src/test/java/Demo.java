@@ -9,6 +9,7 @@ public class Demo {
     new Demo().run();
   }
 
+  @SuppressWarnings("divzero")
   protected void run() {
     // report starting conditions
     final Operation operation =

@@ -19,7 +19,7 @@ Fluent splunk-friendly logging with automatic escaping; e.g
 
         protected void run() {
             // report starting conditions
-            final Operation operation = operation("operation").with("argument", UUID.randomUUID()).started(this);
+            final Operation operation = operation("name").with("argument", UUID.randomUUID()).started(this);
             
             //operation with JSON layout
             final Operation operationJson = Operation.operation("Operation that outputs in JSON format").jsonLayout()

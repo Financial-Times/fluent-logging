@@ -24,4 +24,13 @@ class Parameters {
   protected Map<String, Object> getParameters() {
     return params;
   }
+
+  static Parameters parameters(Map<String, Object> param) {
+    final Parameters result = new Parameters();
+    if (param != null) {
+      result.putAll(param);
+    }
+
+    return result;
+  }
 }
