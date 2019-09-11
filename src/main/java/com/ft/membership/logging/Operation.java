@@ -52,7 +52,6 @@ import static com.ft.membership.logging.Preconditions.checkNotNull;
  */
 public class Operation implements AutoCloseable {
 
-    private static final String JSON = "json";
     private final String operationName;
     private final boolean layout;
     private Object actorOrLogger;
@@ -75,7 +74,6 @@ public class Operation implements AutoCloseable {
         this.actorOrLogger = actorOrLogger;
         this.parameters = parameters;
         this.layout = layout;
-
     }
 
     public static class OperationBuilder extends Parameters {
@@ -110,7 +108,7 @@ public class Operation implements AutoCloseable {
             return this;
         }
 
-        public OperationBuilder jsonLayout(){
+        public OperationBuilder jsonLayout() {
             this.layout = true;
             return this;
         }
