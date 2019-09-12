@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,9 +16,14 @@ import java.util.Map;
 import static com.ft.membership.logging.LogFormatter.NameAndValue.nameAndValue;
 import static com.ft.membership.logging.Preconditions.checkNotNull;
 
-class LogFormatter {
+public class LogFormatter {
     private static final String OUTCOME_IS_SUCCESS = "success";
     private static final String OUTCOME_IS_FAILURE = "failure";
+    private static final String LOG_LEVEL = "logLevel";
+    private static final String TIME = "time";
+    private static final String INFO = "INFO";
+    private static final String DEBUG = "DEBUG";
+    private static final String ERROR = "ERROR";
 
     private final Logger logger;
     private final ObjectWriter objectWriter;
@@ -36,7 +43,7 @@ class LogFormatter {
         addOperation(operation, msgParams);
         addOperationParameters(operation, msgParams);
         if (logger.isInfoEnabled()) {
-            logger.info(buildMsg(operation, msgParams));
+            logger.info(buildMsg(operation, msgParams, INFO));
         }
     }
 
@@ -49,12 +56,12 @@ class LogFormatter {
             addOutcome(OUTCOME_IS_SUCCESS, msgParams);
             addOperationParameters(operation, msgParams);
             addYield(yield, msgParams);
-            logger.info(buildMsg(operation, msgParams));
+            logger.info(buildMsg(operation, msgParams, INFO));
         }
     }
 
-    private String buildMsg(Operation operation, final Collection<NameAndValue> msgParams) {
-        return operation.isJsonLayout() ? buildMsgJson(msgParams) : buildMsgString(msgParams);
+    private String buildMsg(Operation operation, final Collection<NameAndValue> msgParams, String logLevel) {
+        return operation.isJsonLayout() ? buildMsgJson(msgParams, logLevel) : buildMsgString(msgParams);
     }
 
     void logDebug(Operation operation, Yield yield) {
@@ -66,13 +73,13 @@ class LogFormatter {
             addOutcome(OUTCOME_IS_SUCCESS, msgParams);
             addOperationParameters(operation, msgParams);
             addYield(yield, msgParams);
-            logger.debug(buildMsg(operation, msgParams));
+            logger.debug(buildMsg(operation, msgParams, DEBUG));
         }
     }
 
     void logInfo(Operation operation, Failure failure) {
         operation.terminated();
-        
+
         if (logger.isInfoEnabled()) {
             String failureMessage = buildFailureMessage(operation, failure);
             logger.info(failureMessage);
@@ -90,7 +97,7 @@ class LogFormatter {
 
     void logError(final Operation operation, Failure failure) {
         operation.terminated();
-        
+
         if (logger.isErrorEnabled()) {
             String failureMessage = buildFailureMessage(operation, failure);
 
@@ -109,7 +116,7 @@ class LogFormatter {
         addFailureMessage(failure, msgParams);
         addOperationParameters(operation, msgParams);
         addFailureDetails(failure, msgParams);
-        return buildMsg(operation, msgParams);
+        return buildMsg(operation, msgParams, ERROR);
     }
 
     private String buildMsgString(final Collection<NameAndValue> msgParams) {
@@ -125,7 +132,9 @@ class LogFormatter {
         return sb.toString();
     }
 
-    private String buildMsgJson(final Collection<NameAndValue> msgParams) {
+    public String buildMsgJson(final Collection<NameAndValue> msgParams, String logLevel) {
+
+        addLogLevalAndTime(msgParams, logLevel);
         Map<String, Object> map = new HashMap<>();
         msgParams.stream().forEach(nameAndValue -> {
             map.put(nameAndValue.getName(), nameAndValue.getValue());
@@ -139,7 +148,7 @@ class LogFormatter {
         }
         return jsonResult;
     }
-    
+
     private void addOperation(final Operation operation, final Collection<NameAndValue> msgParams) {
         msgParams.add(nameAndValue("operation", operation.getName()));
     }
@@ -172,6 +181,11 @@ class LogFormatter {
         if (failure.didThrow()) {
             msgParams.add(nameAndValue("exception", failure.getThrown().toString()));
         }
+    }
+
+    private void addLogLevalAndTime(final Collection<NameAndValue> msgParams, String logLevel) {
+        msgParams.add(nameAndValue(LOG_LEVEL, logLevel));
+        msgParams.add(nameAndValue(TIME, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:ms").format(Calendar.getInstance().getTime())));
     }
 
     static class NameAndValue {

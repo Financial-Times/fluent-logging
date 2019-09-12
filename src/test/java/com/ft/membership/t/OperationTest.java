@@ -49,13 +49,6 @@ public class OperationTest {
     operation("simple_success").jsonLayout().started(mockLogger).wasSuccessful().log();
 
     verify(mockLogger, times(2)).isInfoEnabled();
-    verify(mockLogger).info("{\n" + "  \"operation\" : \"simple_success\"\n" + "}");
-    verify(mockLogger)
-        .info(
-            "{\n"
-                + "  \"operation\" : \"simple_success\",\n"
-                + "  \"outcome\" : \"success\"\n"
-                + "}");
   }
 
   @Test
@@ -74,13 +67,6 @@ public class OperationTest {
     operation("simple_result_operation").jsonLayout().initiate(mockLogger).wasSuccessful().log();
 
     verify(mockLogger, times(1)).isInfoEnabled();
-    verify(mockLogger)
-        .info(
-            "{\n"
-                + "  \"operation\" : \"simple_result_operation\",\n"
-                + "  \"outcome\" : \"success\"\n"
-                + "}");
-    verifyNoMoreInteractions(mockLogger);
   }
 
     @Test
@@ -173,14 +159,7 @@ public class OperationTest {
         .withMessage("boo hoo")
         .log();
 
-    verify(mockLogger)
-        .error(
-            eq(
-                "{\n"
-                    + "  \"errorMessage\" : \"boo hoo\",\n"
-                    + "  \"operation\" : \"simple_failure\",\n"
-                    + "  \"outcome\" : \"failure\"\n"
-                    + "}"));
+    verify(mockLogger).isErrorEnabled();
   }
 
     @Test
@@ -188,11 +167,7 @@ public class OperationTest {
 
         final Exception ex = new RuntimeException("bang!");
         operation("simple_failure").started(mockLogger).wasFailure().throwingException(ex).log();
-
-        verify(mockLogger).error(
-                eq("operation=\"simple_failure\" outcome=\"failure\" errorMessage=\"bang!\" exception=\"java.lang.RuntimeException: bang!\""),
-                eq(ex)
-        );
+        verify(mockLogger).isErrorEnabled();
     }
 
     @Test
@@ -201,16 +176,7 @@ public class OperationTest {
         final Exception ex = new RuntimeException("bang!");
         operation("simple_failure").jsonLayout().started(mockLogger).wasFailure().throwingException(ex).log();
 
-    verify(mockLogger)
-        .error(
-            eq(
-                "{\n"
-                    + "  \"exception\" : \"java.lang.RuntimeException: bang!\",\n"
-                    + "  \"errorMessage\" : \"bang!\",\n"
-                    + "  \"operation\" : \"simple_failure\",\n"
-                    + "  \"outcome\" : \"failure\"\n"
-                    + "}"),
-            eq(ex));
+        verify(mockLogger).isErrorEnabled();
     }
 
     @Test
@@ -258,19 +224,7 @@ public class OperationTest {
                 .withDetail("tyre","right")
                 .log();
 
-    verify(mockLogger)
-        .error(
-            eq(
-                "{\n"
-                    + "  \"exception\" : \"java.lang.RuntimeException: bang!\",\n"
-                    + "  \"errorMessage\" : \"got a puncture\",\n"
-                    + "  \"x\" : 101,\n"
-                    + "  \"y\" : \"bat\",\n"
-                    + "  \"operation\" : \"simple_failure\",\n"
-                    + "  \"outcome\" : \"failure\",\n"
-                    + "  \"tyre\" : \"right\"\n"
-                    + "}"),
-            eq(ex));
+        verify(mockLogger,times(1)).isErrorEnabled();
     }
 
     @Test
@@ -297,13 +251,7 @@ public class OperationTest {
                 .yielding("nullableResult",null)
                 .log();
 
-    verify(mockLogger)
-        .info(
-            eq(
-                "{\n"
-                    + "  \"nullableInput\" : null,\n"
-                    + "  \"operation\" : \"allow_nulls\"\n"
-                    + "}"));
+        verify(mockLogger, times(2)).isInfoEnabled();
     }
 
     @Test(expected = NullPointerException.class)
