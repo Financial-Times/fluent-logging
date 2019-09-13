@@ -47,7 +47,7 @@ Operation might log:
     09:47:06.397 [main] INFO Demo - {
       "argument" : "f7ca4805-58e0-449f-8cb1-64bf70588285",
       "logLevel" : "INFO",
-      "time" : "2019-09-13 09:47:06:476",
+      "time" : "2019-09-13T09:47:06.476",
       "operation" : "Operation that outputs in JSON format"
     }
 
@@ -65,7 +65,7 @@ on success, or:
       "argument" : "f7ca4805-58e0-449f-8cb1-64bf70588285",
       "logLevel" : "ERROR",
       "errorMessage" : "/ by zero",
-      "time" : "2019-09-13 09:47:06:476",
+      "time" : "2019-09-13T09:47:06.476",
       "operation" : "Operation that outputs in JSON format",
       "outcome" : "failure"
     }
