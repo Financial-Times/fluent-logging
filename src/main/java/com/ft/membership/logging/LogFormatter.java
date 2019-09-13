@@ -6,9 +6,8 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -187,7 +186,7 @@ public class LogFormatter {
 
     private void addLogLevalAndTime(final Collection<NameAndValue> msgParams, String logLevel) {
         msgParams.add(nameAndValue(LOG_LEVEL, logLevel));
-        msgParams.add(nameAndValue(TIME, new SimpleDateFormat(DATE_PATTERN).format(Calendar.getInstance().getTime())));
+        msgParams.add(nameAndValue(TIME, java.time.ZonedDateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN))));
     }
 
     static class NameAndValue {
