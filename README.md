@@ -44,8 +44,10 @@ Operation might log:
 
     09:42:28.503 [main] INFO  Demo - operation=demo id="bd09f108-2a4d-4e47-8b9f-d20c19c0dad0"
     09:42:28.543 [main] INFO  Demo - operation=demo id="bd09f108-2a4d-4e47-8b9f-d20c19c0dad0" outcome=success result="{\"text\": \"hello world\"}"
-    11:54:19.199 [main] INFO Demo - {
-      "argument" : "43a480ab-71a9-4bc7-83ea-be8f742f8cca",
+    09:47:06.397 [main] INFO Demo - {
+      "argument" : "f7ca4805-58e0-449f-8cb1-64bf70588285",
+      "logLevel" : "INFO",
+      "time" : "2019-09-13 09:47:06:476",
       "operation" : "Operation that outputs in JSON format"
     }
 
@@ -58,10 +60,12 @@ on success, or:
         at Demo.main(Demo.java:10) [test-classes/:na]
         at ...
         
-    12:19:08.168 [main] ERROR Demo - {
+    09:47:06.407 [main] ERROR Demo - {
       "exception" : "java.lang.ArithmeticException: / by zero",
-      "argument" : "280ac9ec-17f1-4470-ab5d-f748cac734dc",
+      "argument" : "f7ca4805-58e0-449f-8cb1-64bf70588285",
+      "logLevel" : "ERROR",
       "errorMessage" : "/ by zero",
+      "time" : "2019-09-13 09:47:06:476",
       "operation" : "Operation that outputs in JSON format",
       "outcome" : "failure"
     }
