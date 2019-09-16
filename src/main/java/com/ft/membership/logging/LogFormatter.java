@@ -24,7 +24,8 @@ public class LogFormatter {
     private static final String DEBUG = "DEBUG";
     private static final String ERROR = "ERROR";
     private static final String WARN = "WARN";
-    private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN);
 
     private final Logger logger;
     private final ObjectWriter objectWriter;
@@ -186,7 +187,7 @@ public class LogFormatter {
 
     private void addLogLevalAndTime(final Collection<NameAndValue> msgParams, String logLevel) {
         msgParams.add(nameAndValue(LOG_LEVEL, logLevel));
-        msgParams.add(nameAndValue(TIME, java.time.ZonedDateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN))));
+        msgParams.add(nameAndValue(TIME, java.time.ZonedDateTime.now().format(DATE_TIME_FORMATTER)));
     }
 
     static class NameAndValue {
