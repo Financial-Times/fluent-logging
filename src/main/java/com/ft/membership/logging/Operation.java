@@ -69,6 +69,10 @@ public class Operation implements AutoCloseable {
         return new OperationBuilder(operation);
     }
 
+    public Operation(final String operationName, final Object actorOrLogger, final Map<String, Object> parameters) {
+        this(operationName, actorOrLogger, parameters, false);
+    }
+
     public Operation(final String operationName, final Object actorOrLogger, final Map<String, Object> parameters, final boolean layout) {
         this.operationName = operationName;
         this.actorOrLogger = actorOrLogger;
