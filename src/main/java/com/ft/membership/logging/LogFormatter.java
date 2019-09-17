@@ -25,7 +25,7 @@ public class LogFormatter {
     private static final String DEBUG = "DEBUG";
     private static final String ERROR = "ERROR";
     private static final String WARN = "WARN";
-    private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSz";
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN);
 
     private final Logger logger;
