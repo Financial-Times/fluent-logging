@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * An Operation is a logging context with starting parameters, which either succeeds or fails, supporting additional
- * detail as to what happened. It logs in a <tt>key="value"</tt> format suitable for parsing by a log aggregator such as
- * Splunk, escaping quotes with back-slashes.
+ * An Operation is a logging context with starting parameters, which either succeeds or fails,
+ * supporting additional detail as to what happened. It logs in a <tt>key="value"</tt> format
+ * suitable for parsing by a log aggregator such as Splunk, escaping quotes with back-slashes.
  *
- * <p>e.g.</p>
+ * <p>e.g.
  *
  * <pre>
  *     Operation operation = Operation.operation("launch")
@@ -33,7 +33,9 @@ import java.util.Optional;
  *             .log();
  *     }
  * </pre>
+ *
  * On success, this would log something like:
+ *
  * <pre>
  *     INFO operation="launch" probe=27 target="Mars"
  *     ...
@@ -41,6 +43,7 @@ import java.util.Optional;
  * </pre>
  *
  * or on failure:
+ *
  * <pre>
  *     INFO operation="launch" probe=27 target="Mars"
  *     ...
@@ -48,184 +51,204 @@ import java.util.Optional;
  *     LaunchException: exception message
  *     ...stacktrace...
  * </pre>
- *
  */
 public class Operation implements AutoCloseable {
 
+  private final String operationName;
+  private final boolean layout;
+  private Object actorOrLogger;
+
+  private boolean terminated;
+
+  private Map<String, Object> parameters;
+
+  /**
+   * create an Operation, ready for decoration with parameters.
+   *
+   * @param operation name of the operation.
+   * @return an Operation.
+   */
+  public static OperationBuilder operation(final String operation) {
+    return new OperationBuilder(operation);
+  }
+
+  /** @deprecated Use {@link OperationBuilder} instead. */
+  @Deprecated
+  public Operation(
+      final String operationName,
+      final Object actorOrLogger,
+      final Map<String, Object> parameters) {
+    this(operationName, actorOrLogger, parameters, false);
+  }
+
+  private Operation(
+      final String operationName,
+      final Object actorOrLogger,
+      final Map<String, Object> parameters,
+      final boolean layout) {
+    this.operationName = operationName;
+    this.actorOrLogger = actorOrLogger;
+    this.parameters = parameters;
+    this.layout = layout;
+  }
+
+  public static class OperationBuilder extends Parameters {
+
     private final String operationName;
-    private final boolean layout;
-    private Object actorOrLogger;
+    private boolean layout;
 
-    private boolean terminated;
-
-    private Map<String, Object> parameters;
-
-    /**
-     * create an Operation, ready for decoration with parameters.
-     * @param operation name of the operation.
-     * @return an Operation.
-     */
-    public static OperationBuilder operation(final String operation) {
-        return new OperationBuilder(operation);
+    OperationBuilder(final String operationName) {
+      checkNotNull(operationName, "require operationName");
+      this.operationName = operationName;
     }
 
     /**
-     * @deprecated Use {@link OperationBuilder} instead.
-     */
-    @Deprecated
-    public Operation(final String operationName, final Object actorOrLogger, final Map<String, Object> parameters) {
-        this(operationName, actorOrLogger, parameters, false);
-    }
-
-    private Operation(final String operationName, final Object actorOrLogger, final Map<String, Object> parameters, final boolean layout) {
-        this.operationName = operationName;
-        this.actorOrLogger = actorOrLogger;
-        this.parameters = parameters;
-        this.layout = layout;
-    }
-
-    public static class OperationBuilder extends Parameters {
-
-        private final String operationName;
-        private boolean layout;
-
-        OperationBuilder(final String operationName){
-            checkNotNull(operationName, "require operationName");
-            this.operationName = operationName;
-        }
-        
-        /**
-         * add a starting parameter.
-         * @param key a log key
-         * @param value a value
-         * @return Operation
-         */
-        public OperationBuilder with(final Key key, final Object value) {
-            return with(key.getKey(), value);
-        }
-
-        /**
-         * add a starting parameter.
-         * @param key a log key string
-         * @param value a value
-         * @return Operation
-         */
-        public OperationBuilder with(final String key, final Object value) {
-            put(key, value);
-            return this;
-        }
-
-        public OperationBuilder jsonLayout() {
-            this.layout = true;
-            return this;
-        }
-
-        /**
-         * add starting parameters from entries in a map.
-         * @param keyValues a map of parameter key-values
-         * @return Operation
-         */
-        public OperationBuilder with(final Map<String, Object> keyValues) {
-            putAll(keyValues);
-            return this;
-        }
-
-        /**
-         * mark the start of an operation, logging starting parameters at <tt>INFO</tt> level.
-         * @param actorOrLogger object for logging context; may be an instance of {@link org.slf4j.Logger},
-         *                      in which case that logger will be used for logging, or an object in which case
-         *                      a logger will be obtained by passing that object to {@link org.slf4j.LoggerFactory}.
-         *
-         * @return Operation
-         */
-        public Operation started(final Object actorOrLogger) {
-            final Operation operation = new Operation(operationName, actorOrLogger, getParameters(), layout);
-            new LogFormatter(actorOrLogger).logStart(operation);
-            return operation;
-        }
-
-        /**
-         * mark the start of an operation, but do not log starting parameters, for less noise.
-         * <p>parameters will still be logged on a termination, e.g. on {@link #wasSuccessful()}.</p>
-         * @param actorOrLogger object for logging context; may be an instance of {@link org.slf4j.Logger},
-         *                      in which case that logger will be used for logging, or an object in which case
-         *                      a logger will be obtained by passing that object to {@link org.slf4j.LoggerFactory}.
-         * @return Operation
-         */
-        public Operation initiate(final Object actorOrLogger) {
-            return new Operation(operationName, actorOrLogger, getParameters(), layout);
-        }
-    }
-
-    /**
-     * mark the operation as successful, and prepare to log.
-     * @return a Yield to be decorated and logged.
-     */
-    public Yield wasSuccessful() {
-        return new Yield(this);
-    }
-
-    /**
-     * mark the operation as a failure, and prepare to log.
-     * @return a Failure to be decorated and logged.
-     */
-    public Failure wasFailure() {
-        return new Failure(this);
-    }
-
-    /**
-     * log something before closing the operation with {@link #wasSuccessful()} or {@link #wasFailure()}
-     * <p>e.g.</p>
+     * add a starting parameter.
      *
-     * <pre>
-     *     Operation operation = Operation.operation("launch").started(this);
-     *
-     *     operation.logIntermediate("action", "checkEngine").log();
-     *     checkEngine();
-     *
-     *     Flight f = probe.launch();
-     *
-     *     operation.wasSuccessful().log();
-     * </pre>
-     * On success, this would log something like:
-     * <pre>
-     *     INFO operation="launch"
-     *     INFO operation="launch" action="checkEngine"
-     *     ...
-     *     INFO operation="launch" outcome="success"
-     * </pre>
+     * @param key a log key
+     * @param value a value
+     * @return Operation
      */
-    public IntermediateYield logIntermediate() {
-        return new IntermediateYield(this);
-    }
-    
-    void terminated() {
-        this.terminated = true;
+    public OperationBuilder with(final Key key, final Object value) {
+      return with(key.getKey(), value);
     }
 
-    String getName() {
-        return operationName;
+    /**
+     * add a starting parameter.
+     *
+     * @param key a log key string
+     * @param value a value
+     * @return Operation
+     */
+    public OperationBuilder with(final String key, final Object value) {
+      put(key, value);
+      return this;
     }
 
-    Map<String, Object> getParameters() {
-        return parameters;
+    public OperationBuilder jsonLayout() {
+      this.layout = true;
+      return this;
     }
 
-    Object getActorOrLogger() {
-        return actorOrLogger;
+    /**
+     * add starting parameters from entries in a map.
+     *
+     * @param keyValues a map of parameter key-values
+     * @return Operation
+     */
+    public OperationBuilder with(final Map<String, Object> keyValues) {
+      putAll(keyValues);
+      return this;
     }
 
-    @Override
-    public void close() {
-        if (!terminated) {
-            this.wasFailure()
-                    .throwingException(new IllegalStateException("Programmer error: operation auto-closed before wasSuccessful() or wasFailure() called.")) // so we at least get a stack-trace
-                    .log(Optional.ofNullable(actorOrLogger).orElse(this));
-        }
+    /**
+     * mark the start of an operation, logging starting parameters at <tt>INFO</tt> level.
+     *
+     * @param actorOrLogger object for logging context; may be an instance of {@link
+     *     org.slf4j.Logger}, in which case that logger will be used for logging, or an object in
+     *     which case a logger will be obtained by passing that object to {@link
+     *     org.slf4j.LoggerFactory}.
+     * @return Operation
+     */
+    public Operation started(final Object actorOrLogger) {
+      final Operation operation =
+          new Operation(operationName, actorOrLogger, getParameters(), layout);
+      new LogFormatter(actorOrLogger).logStart(operation);
+      return operation;
     }
 
-    public boolean isJsonLayout() {
-        return layout;
+    /**
+     * mark the start of an operation, but do not log starting parameters, for less noise.
+     *
+     * <p>parameters will still be logged on a termination, e.g. on {@link #wasSuccessful()}.
+     *
+     * @param actorOrLogger object for logging context; may be an instance of {@link
+     *     org.slf4j.Logger}, in which case that logger will be used for logging, or an object in
+     *     which case a logger will be obtained by passing that object to {@link
+     *     org.slf4j.LoggerFactory}.
+     * @return Operation
+     */
+    public Operation initiate(final Object actorOrLogger) {
+      return new Operation(operationName, actorOrLogger, getParameters(), layout);
     }
+  }
 
+  /**
+   * mark the operation as successful, and prepare to log.
+   *
+   * @return a Yield to be decorated and logged.
+   */
+  public Yield wasSuccessful() {
+    return new Yield(this);
+  }
+
+  /**
+   * mark the operation as a failure, and prepare to log.
+   *
+   * @return a Failure to be decorated and logged.
+   */
+  public Failure wasFailure() {
+    return new Failure(this);
+  }
+
+  /**
+   * log something before closing the operation with {@link #wasSuccessful()} or {@link
+   * #wasFailure()}
+   *
+   * <p>e.g.
+   *
+   * <pre>
+   *     Operation operation = Operation.operation("launch").started(this);
+   *
+   *     operation.logIntermediate("action", "checkEngine").log();
+   *     checkEngine();
+   *
+   *     Flight f = probe.launch();
+   *
+   *     operation.wasSuccessful().log();
+   * </pre>
+   *
+   * On success, this would log something like:
+   *
+   * <pre>
+   *     INFO operation="launch"
+   *     INFO operation="launch" action="checkEngine"
+   *     ...
+   *     INFO operation="launch" outcome="success"
+   * </pre>
+   */
+  public IntermediateYield logIntermediate() {
+    return new IntermediateYield(this);
+  }
+
+  void terminated() {
+    this.terminated = true;
+  }
+
+  String getName() {
+    return operationName;
+  }
+
+  Map<String, Object> getParameters() {
+    return parameters;
+  }
+
+  Object getActorOrLogger() {
+    return actorOrLogger;
+  }
+
+  @Override
+  public void close() {
+    if (!terminated) {
+      this.wasFailure()
+          .throwingException(
+              new IllegalStateException(
+                  "Programmer error: operation auto-closed before wasSuccessful() or wasFailure() called.")) // so we at least get a stack-trace
+          .log(Optional.ofNullable(actorOrLogger).orElse(this));
+    }
+  }
+
+  public boolean isJsonLayout() {
+    return layout;
+  }
 }

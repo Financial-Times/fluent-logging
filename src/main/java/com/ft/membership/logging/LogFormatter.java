@@ -16,252 +16,257 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LogFormatter {
-    private static final String OUTCOME_IS_SUCCESS = "success";
-    private static final String OUTCOME_IS_FAILURE = "failure";
-    private static final String LOG_LEVEL = "logLevel";
-    private static final String TIME = "time";
-    private static final String INFO = "INFO";
-    private static final String DEBUG = "DEBUG";
-    private static final String ERROR = "ERROR";
-    private static final String WARN = "WARN";
-    private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSz";
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN);
+  private static final String OUTCOME_IS_SUCCESS = "success";
+  private static final String OUTCOME_IS_FAILURE = "failure";
+  private static final String LOG_LEVEL = "logLevel";
+  private static final String TIME = "time";
+  private static final String INFO = "INFO";
+  private static final String DEBUG = "DEBUG";
+  private static final String ERROR = "ERROR";
+  private static final String WARN = "WARN";
+  private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSz";
+  private static final DateTimeFormatter DATE_TIME_FORMATTER =
+      DateTimeFormatter.ofPattern(DATE_PATTERN);
 
-    private final Logger logger;
-    private final ObjectWriter objectWriter;
+  private final Logger logger;
+  private final ObjectWriter objectWriter;
 
-    LogFormatter(Object actorOrLogger) {
-        objectWriter = new ObjectMapper().writer();
-        checkNotNull(actorOrLogger,"require actor or logger");
-        if (actorOrLogger instanceof Logger) {
-            logger = (Logger) actorOrLogger;
-        } else {
-            logger = LoggerFactory.getLogger(actorOrLogger.getClass());
-        }
+  LogFormatter(Object actorOrLogger) {
+    objectWriter = new ObjectMapper().writer();
+    checkNotNull(actorOrLogger, "require actor or logger");
+    if (actorOrLogger instanceof Logger) {
+      logger = (Logger) actorOrLogger;
+    } else {
+      logger = LoggerFactory.getLogger(actorOrLogger.getClass());
+    }
+  }
+
+  void logStart(final Operation operation) {
+    final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
+    addOperation(operation, msgParams);
+    addOperationParameters(operation, msgParams);
+    if (logger.isInfoEnabled()) {
+      logger.info(buildMsg(operation, msgParams, INFO));
+    }
+  }
+
+  void logInfo(final Operation operation, Yield yield, boolean terminateOperation) {
+    if (terminateOperation) {
+      operation.terminated();
     }
 
-    void logStart(final Operation operation) {
-        final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
-        addOperation(operation, msgParams);
-        addOperationParameters(operation, msgParams);
-        if (logger.isInfoEnabled()) {
-            logger.info(buildMsg(operation, msgParams, INFO));
-        }
+    if (logger.isInfoEnabled()) {
+      final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
+      addOperation(operation, msgParams);
+      if (terminateOperation) {
+        addOutcome(OUTCOME_IS_SUCCESS, msgParams);
+      }
+      addOperationParameters(operation, msgParams);
+      addYield(yield, msgParams);
+      logger.info(buildMsg(operation, msgParams, INFO));
+    }
+  }
+
+  private String buildMsg(
+      Operation operation, final Collection<NameAndValue> msgParams, String logLevel) {
+    return operation.isJsonLayout() ? buildMsgJson(msgParams, logLevel) : buildMsgString(msgParams);
+  }
+
+  void logDebug(Operation operation, Yield yield, boolean terminateOperation) {
+    if (terminateOperation) {
+      operation.terminated();
     }
 
-    void logInfo(final Operation operation, Yield yield, boolean terminateOperation) {
-        if (terminateOperation) {
-            operation.terminated();
-        }
+    if (logger.isDebugEnabled()) {
+      final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
+      addOperation(operation, msgParams);
+      if (terminateOperation) {
+        addOutcome(OUTCOME_IS_SUCCESS, msgParams);
+      }
+      addOperationParameters(operation, msgParams);
+      addYield(yield, msgParams);
+      logger.debug(buildMsg(operation, msgParams, DEBUG));
+    }
+  }
 
-        if (logger.isInfoEnabled()) {
-            final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
-            addOperation(operation, msgParams);
-            if (terminateOperation) {
-                addOutcome(OUTCOME_IS_SUCCESS, msgParams);
-            }
-            addOperationParameters(operation, msgParams);
-            addYield(yield, msgParams);
-            logger.info(buildMsg(operation, msgParams, INFO));
-        }
+  void logInfo(Operation operation, Failure failure, boolean terminateOperation) {
+    if (terminateOperation) {
+      operation.terminated();
     }
 
-    private String buildMsg(Operation operation, final Collection<NameAndValue> msgParams, String logLevel) {
-        return operation.isJsonLayout() ? buildMsgJson(msgParams, logLevel) : buildMsgString(msgParams);
+    if (logger.isInfoEnabled()) {
+      String failureMessage = buildFailureMessage(operation, failure, INFO);
+      logger.info(failureMessage);
     }
-    
-    void logDebug(Operation operation, Yield yield, boolean terminateOperation) {
-        if (terminateOperation) {
-            operation.terminated();
-        }
+  }
 
-        if (logger.isDebugEnabled()) {
-            final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
-            addOperation(operation, msgParams);
-            if (terminateOperation) {
-              addOutcome(OUTCOME_IS_SUCCESS, msgParams);
-            }
-            addOperationParameters(operation, msgParams);
-            addYield(yield, msgParams);
-            logger.debug(buildMsg(operation, msgParams, DEBUG));
-        }
+  void logWarn(Operation operation, Failure failure, boolean terminateOperation) {
+    if (terminateOperation) {
+      operation.terminated();
     }
 
-    void logInfo(Operation operation, Failure failure, boolean terminateOperation) {
-        if (terminateOperation) {
-            operation.terminated();
-        }
-        
-        if (logger.isInfoEnabled()) {
-            String failureMessage = buildFailureMessage(operation, failure, INFO);
-            logger.info(failureMessage);
-        }
+    if (logger.isWarnEnabled()) {
+      String failureMessage = buildFailureMessage(operation, failure, WARN);
+      logger.warn(failureMessage);
+    }
+  }
+
+  void logWarn(Operation operation, Yield yield, boolean terminateOperation) {
+    if (terminateOperation) {
+      operation.terminated();
     }
 
-    void logWarn(Operation operation, Failure failure, boolean terminateOperation) {
-        if (terminateOperation) {
-            operation.terminated();
-        }
+    if (logger.isWarnEnabled()) {
+      final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
+      addOperation(operation, msgParams);
+      addYield(yield, msgParams);
 
-        if (logger.isWarnEnabled()) {
-            String failureMessage = buildFailureMessage(operation, failure, WARN);
-            logger.warn(failureMessage);
-        }
+      logger.warn(buildMsg(operation, msgParams, WARN));
+    }
+  }
+
+  void logError(final Operation operation, Failure failure, boolean terminateOperation) {
+    if (terminateOperation) {
+      operation.terminated();
     }
 
-    void logWarn(Operation operation, Yield yield, boolean terminateOperation) {
-        if (terminateOperation) {
-            operation.terminated();
-        }
+    if (logger.isErrorEnabled()) {
+      String failureMessage = buildFailureMessage(operation, failure, ERROR);
 
-        if (logger.isWarnEnabled()) {
-            final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
-            addOperation(operation, msgParams);
-            addYield(yield, msgParams);
+      if (failure.didThrow()) {
+        logger.error(failureMessage, failure.getThrown());
+      } else {
+        logger.error(failureMessage);
+      }
+    }
+  }
 
-            logger.warn(buildMsg(operation, msgParams, WARN));
-        }
+  void logError(Operation operation, Yield yield, boolean terminateOperation) {
+    if (terminateOperation) {
+      operation.terminated();
     }
 
-    void logError(final Operation operation, Failure failure, boolean terminateOperation) {
-        if (terminateOperation) {
-          operation.terminated();
-        }
-        
-        if (logger.isErrorEnabled()) {
-            String failureMessage = buildFailureMessage(operation, failure, ERROR);
+    if (logger.isErrorEnabled()) {
+      final Collection<NameAndValue> msgParams = new ArrayList<>();
+      addOperation(operation, msgParams);
+      addYield(yield, msgParams);
 
-            if (failure.didThrow()) {
-                logger.error(failureMessage, failure.getThrown());
-            } else {
-                logger.error(failureMessage);
-            }
-        }
+      logger.error(buildMsg(operation, msgParams, ERROR));
+    }
+  }
+
+  private String buildFailureMessage(final Operation operation, Failure failure, String logLevel) {
+    final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
+    addOperation(operation, msgParams);
+    addOutcome(OUTCOME_IS_FAILURE, msgParams);
+    addFailureMessage(failure, msgParams);
+    addOperationParameters(operation, msgParams);
+    addFailureDetails(failure, msgParams);
+    return buildMsg(operation, msgParams, logLevel);
+  }
+
+  private String buildMsgString(final Collection<NameAndValue> msgParams) {
+    final StringBuilder sb = new StringBuilder();
+    boolean addSeperator = false;
+    for (NameAndValue msgParam : msgParams) {
+      if (addSeperator) {
+        sb.append(" ");
+      }
+      sb.append(msgParam);
+      addSeperator = true;
+    }
+    return sb.toString();
+  }
+
+  private String buildMsgJson(final Collection<NameAndValue> msgParams, String logLevel) {
+
+    addLogLevalAndTime(msgParams, logLevel);
+    Map<String, Object> map = new HashMap<>();
+    msgParams.stream()
+        .forEach(
+            nameAndValue -> {
+              map.put(nameAndValue.getName(), nameAndValue.getValue());
+            });
+
+    String jsonResult = "";
+    try {
+      jsonResult = objectWriter.writeValueAsString(map).concat(System.lineSeparator());
+    } catch (JsonProcessingException e) {
+      logger.info("Failed to serialize the object to JSON, error={}", e.getLocalizedMessage());
+    }
+    return jsonResult;
+  }
+
+  private void addOperation(final Operation operation, final Collection<NameAndValue> msgParams) {
+    msgParams.add(nameAndValue("operation", operation.getName()));
+  }
+
+  private void addOperationParameters(
+      final Operation operation, final Collection<NameAndValue> msgParams) {
+    addParametersAsNamedValues(msgParams, operation.getParameters());
+  }
+
+  private void addOutcome(String outcome, final Collection<NameAndValue> msgParams) {
+    msgParams.add(nameAndValue("outcome", outcome));
+  }
+
+  private void addYield(Yield yield, final Collection<NameAndValue> msgParams) {
+    addParametersAsNamedValues(msgParams, yield.getParameters());
+  }
+
+  private void addParametersAsNamedValues(
+      final Collection<NameAndValue> msgParams, Map<String, Object> parameters) {
+    for (String name : parameters.keySet()) {
+      msgParams.add(nameAndValue(name, parameters.get(name)));
+    }
+  }
+
+  private void addFailureMessage(Failure failure, final Collection<NameAndValue> msgParams) {
+    msgParams.add(nameAndValue("errorMessage", failure.getFailureMessage()));
+  }
+
+  private void addFailureDetails(Failure failure, final Collection<NameAndValue> msgParams) {
+    addParametersAsNamedValues(msgParams, failure.getParameters());
+
+    if (failure.didThrow()) {
+      msgParams.add(nameAndValue("exception", failure.getThrown().toString()));
+    }
+  }
+
+  private void addLogLevalAndTime(final Collection<NameAndValue> msgParams, String logLevel) {
+    msgParams.add(nameAndValue(LOG_LEVEL, logLevel));
+    msgParams.add(
+        nameAndValue(
+            TIME, java.time.ZonedDateTime.now(ZoneOffset.UTC).format(DATE_TIME_FORMATTER)));
+  }
+
+  static class NameAndValue {
+    private String name;
+    private Object value;
+
+    static NameAndValue nameAndValue(String name, Object value) {
+      return new NameAndValue(name, value);
     }
 
-
-    void logError(Operation operation, Yield yield, boolean terminateOperation) {
-        if (terminateOperation) {
-            operation.terminated();
-        }
-
-        if (logger.isErrorEnabled()) {
-            final Collection<NameAndValue> msgParams = new ArrayList<>();
-            addOperation(operation, msgParams);
-            addYield(yield, msgParams);
-
-            logger.error(buildMsg(operation, msgParams, ERROR));
-        }
+    private NameAndValue(String name, Object value) {
+      this.name = name;
+      this.value = value;
     }
 
-    private String buildFailureMessage(final Operation operation, Failure failure, String logLevel) {
-        final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
-        addOperation(operation, msgParams);
-        addOutcome(OUTCOME_IS_FAILURE, msgParams);
-        addFailureMessage(failure, msgParams);
-        addOperationParameters(operation, msgParams);
-        addFailureDetails(failure, msgParams);
-        return buildMsg(operation, msgParams, logLevel);
-    }
-    
-    private String buildMsgString(final Collection<NameAndValue> msgParams) {
-        final StringBuilder sb = new StringBuilder();
-        boolean addSeperator = false;
-        for (NameAndValue msgParam : msgParams) {
-            if (addSeperator) {
-                sb.append(" ");
-            }
-            sb.append(msgParam);
-            addSeperator = true;
-        }
-        return sb.toString();
+    public String toString() {
+      if (value instanceof Integer || value instanceof Long) {
+        return String.format("%s=%d", name, value);
+      } else {
+        return String.format("%s=%s", name, new ToStringWrapper(value).toString());
+      }
     }
 
-    private String buildMsgJson(final Collection<NameAndValue> msgParams, String logLevel) {
-
-        addLogLevalAndTime(msgParams, logLevel);
-        Map<String, Object> map = new HashMap<>();
-        msgParams.stream().forEach(nameAndValue -> {
-            map.put(nameAndValue.getName(), nameAndValue.getValue());
-        });
-
-        String jsonResult = "";
-        try {
-            jsonResult = objectWriter.writeValueAsString(map).concat(System.lineSeparator());
-        } catch (JsonProcessingException e) {
-            logger.info("Failed to serialize the object to JSON, error={}", e.getLocalizedMessage());
-        }
-        return jsonResult;
+    public String getName() {
+      return name;
     }
 
-    private void addOperation(final Operation operation, final Collection<NameAndValue> msgParams) {
-        msgParams.add(nameAndValue("operation", operation.getName()));
+    public Object getValue() {
+      return value;
     }
-
-    private void addOperationParameters(final Operation operation, final Collection<NameAndValue> msgParams) {
-        addParametersAsNamedValues(msgParams, operation.getParameters());
-    }
-
-    private void addOutcome(String outcome, final Collection<NameAndValue> msgParams) {
-        msgParams.add(nameAndValue("outcome", outcome));
-    }
-
-    private void addYield(Yield yield, final Collection<NameAndValue> msgParams) {
-        addParametersAsNamedValues(msgParams, yield.getParameters());
-    }
-
-    private void addParametersAsNamedValues(final Collection<NameAndValue> msgParams, Map<String, Object> parameters) {
-        for (String name : parameters.keySet()) {
-            msgParams.add(nameAndValue(name, parameters.get(name)));
-        }
-    }
-
-    private void addFailureMessage(Failure failure, final Collection<NameAndValue> msgParams) {
-        msgParams.add(nameAndValue("errorMessage", failure.getFailureMessage()));
-    }
-
-    private void addFailureDetails(Failure failure, final Collection<NameAndValue> msgParams) {
-        addParametersAsNamedValues(msgParams, failure.getParameters());
-
-        if (failure.didThrow()) {
-            msgParams.add(nameAndValue("exception", failure.getThrown().toString()));
-        }
-    }
-
-    private void addLogLevalAndTime(final Collection<NameAndValue> msgParams, String logLevel) {
-        msgParams.add(nameAndValue(LOG_LEVEL, logLevel));
-        msgParams.add(nameAndValue(TIME, java.time.ZonedDateTime.now(ZoneOffset.UTC).format(DATE_TIME_FORMATTER)));
-    }
-
-    static class NameAndValue {
-        private String name;
-        private Object value;
-
-        static NameAndValue nameAndValue(String name, Object value) {
-            return new NameAndValue(name, value);
-        }
-        
-        private NameAndValue(String name, Object value) {
-            this.name = name;
-            this.value = value;
-        }
-        
-        public String toString() {
-            if (value instanceof Integer || value instanceof Long) {
-                return String.format("%s=%d", name, value);
-            } else {
-                return String.format("%s=%s", name, new ToStringWrapper(value).toString());
-            }
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-        
-    }
-    
+  }
 }

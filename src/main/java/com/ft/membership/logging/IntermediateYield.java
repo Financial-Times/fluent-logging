@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class IntermediateYield extends Yield {
   private Operation operation;
-  
+
   IntermediateYield(Operation operation) {
     super(operation);
     this.operation = operation;
@@ -12,6 +12,7 @@ public class IntermediateYield extends Yield {
 
   /**
    * add a key-value to the yield.
+   *
    * @param key a key.
    * @param value a value.
    * @return the IntermediateYield
@@ -24,6 +25,7 @@ public class IntermediateYield extends Yield {
 
   /**
    * add all key-values from a map to the yield.
+   *
    * @param keyValues a map of key-values.
    * @return the IntermediateYield
    */
@@ -35,6 +37,7 @@ public class IntermediateYield extends Yield {
 
   /**
    * add a key-value to the yield.
+   *
    * @param key a key.
    * @param value a value.
    * @return the IntermediateYield
@@ -46,22 +49,24 @@ public class IntermediateYield extends Yield {
   }
 
   /**
-   * log this success with an <tt>INFO</tt> log-level, using the log context passed when starting the operation.
+   * log this success with an <tt>INFO</tt> log-level, using the log context passed when starting
+   * the operation.
    */
   @Override
   public void log() {
     new LogFormatter(operation.getActorOrLogger()).logInfo(operation, this, false);
   }
-  
+
   /**
    * log this success with an <tt>INFO</tt> log-level
+   *
    * @param actorOrLogger an alternative logger or object for log context
    */
   @Override
   public void log(final Object actorOrLogger) {
     new LogFormatter(actorOrLogger).logInfo(operation, this, false);
   }
-  
+
   public void logInfo() {
     new LogFormatter(operation.getActorOrLogger()).logInfo(operation, this, false);
   }
@@ -77,7 +82,7 @@ public class IntermediateYield extends Yield {
   public void logError() {
     new LogFormatter(operation.getActorOrLogger()).logError(operation, this, false);
   }
-  
+
   public void logInfo(final Object actorOrLogger) {
     new LogFormatter(actorOrLogger).logInfo(operation, this, false);
   }
