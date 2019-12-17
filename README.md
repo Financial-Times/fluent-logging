@@ -104,6 +104,9 @@ Create operation with jsonLayout:
         final Operation operationJson = Operation.operation("Operation that outputs in JSON format").jsonLayout()
                         .with("argument", UUID.randomUUID()).started(this);
 
+## Contributing
+
+This project uses [google java format](https://github.com/google/google-java-format)
 
 ## Internal Release
 
