@@ -2,10 +2,9 @@ package com.ft.membership.logging;
 
 import static com.ft.membership.logging.Preconditions.checkNotNull;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
+import java.util.Objects;
 import org.slf4j.MDC;
 import org.slf4j.event.Level;
 
@@ -31,6 +30,12 @@ public final class SimpleOperationContext extends OperationContext {
   public static SimpleOperationContext action(final String name, final Object actorOrLogger) {
     final SimpleOperationContext context = new SimpleOperationContext(name, actorOrLogger, null);
     new ActionConstructedState(context);
+
+    final String operation = MDC.get("operation");
+    if (Objects.nonNull(operation) && !operation.isEmpty()) {
+      context.with(Key.Operation, operation);
+    }
+
     return context;
   }
 
@@ -54,6 +59,9 @@ public final class SimpleOperationContext extends OperationContext {
     if (state.getType() == "operation") {
       MDC.remove("operation");
     }
+
+    // We need to clear the reference
+    state = null;
   }
 
   // Needed for linking operations with actions

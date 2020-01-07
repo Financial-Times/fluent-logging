@@ -1,16 +1,11 @@
 package com.ft.membership.logging;
 
-import java.util.Map;
-
 public interface OperationState {
-    // OperationState(final SimpleOperationContext operationContext);
+  String getType();
 
-    void with(final Map<String, Object> keyValues);
-    void with(final String key, final Object value);
+  void start();
 
-    String getType();
+  void succeed();
 
-    void start();
-    void succeed();
-    void fail();
+  void fail();
 }

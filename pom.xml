@@ -16,14 +16,14 @@
 
     <developers>
         <developer>
-            <name>Ellis Pritchard</name>
-            <email>ellis.pritchard@ft.com</email>
+            <name>Ognyan Angelov</name>
+            <email>ognyan.angelov@ft.com</email>
             <organization>Financial Times</organization>
             <organizationUrl>https://github.com/Financial-Times</organizationUrl>
         </developer>
         <developer>
-            <name>Matthew Clarke</name>
-            <email>matthew.clarke@ft.com</email>
+            <name>Stoyan Dimov</name>
+            <email>stoyan.dimov@ft.com</email>
             <organization>Financial Times</organization>
             <organizationUrl>https://github.com/Financial-Times</organizationUrl>
         </developer>
@@ -38,13 +38,6 @@
     <groupId>com.ft.membership</groupId>
     <artifactId>fluent-logging</artifactId>
     <version>4.0.0-SNAPSHOT</version>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <properties>
         <target-jdk>1.8</target-jdk>

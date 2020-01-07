@@ -12,16 +12,11 @@ public class SuccessState implements OperationState {
     context = simpleOperationContext;
     type = context.getType();
     context.setState(this);
-
+    context.with(Key.OperationState, "success");
     context.log(Outcome.Success, Level.INFO);
+
     context.clear();
   }
-
-  @Override
-  public void with(Map<String, Object> keyValues) {}
-
-  @Override
-  public void with(String key, Object value) {}
 
   @Override
   public String getType() {return type;}

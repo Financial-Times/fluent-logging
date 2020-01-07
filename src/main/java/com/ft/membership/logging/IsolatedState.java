@@ -16,16 +16,6 @@ public class IsolatedState implements OperationState {
   }
 
   @Override
-  public void with(Map<String, Object> keyValues) {
-    context.addParam(keyValues);
-  }
-
-  @Override
-  public void with(String key, Object value) {
-    context.addParam(key, value);
-  }
-
-  @Override
   public String getType() {
     return type;
   }

@@ -1,8 +1,5 @@
 package com.ft.membership.logging;
 
-
-import java.util.Map;
-
 public class OperationConstructedState implements OperationState {
 
   private SimpleOperationContext context;
@@ -13,16 +10,6 @@ public class OperationConstructedState implements OperationState {
     context.setState(this);
 
     context.addIdentity(context.getName());
-  }
-
-  @Override
-  public void with(Map<String, Object> keyValues) {
-    context.addParam(keyValues);
-  }
-
-  @Override
-  public void with(String key, Object value) {
-    context.addParam(key, value);
   }
 
   @Override

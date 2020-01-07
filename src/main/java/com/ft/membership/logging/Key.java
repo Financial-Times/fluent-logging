@@ -5,6 +5,7 @@ public enum Key {
   UserEmail("email"),
   Result("result"),
   DebugMessage("debugMessage"),
+  OperationState("operationState"),
   Operation("operation");
 
   private final String key;

@@ -12,18 +12,9 @@ public class StartedState implements OperationState {
     context = simpleOperationContext;
     type = context.getType();
     context.setState(this);
+    context.with(Key.OperationState, "started");
 
     context.log(Level.INFO);
-  }
-
-  @Override
-  public void with(Map<String, Object> keyValues) {
-    context.addParam(keyValues);
-  }
-
-  @Override
-  public void with(String key, Object value) {
-    context.addParam(key, value);
   }
 
   @Override
@@ -38,7 +29,7 @@ public class StartedState implements OperationState {
 
   @Override
   public void succeed() {
-    context.setState(new SuccessState(context));
+    new SuccessState(context);
   }
 
   @Override

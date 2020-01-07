@@ -12,19 +12,10 @@ public class FailState implements OperationState {
     context = simpleOperationContext;
     type = context.getType();
     context.setState(this);
+    context.with(Key.OperationState, "fail");
 
     context.log(Outcome.Failure, Level.ERROR);
     context.clear();
-  }
-
-  @Override
-  public void with(Map<String, Object> keyValues) {
-    context.addParam(keyValues);
-  }
-
-  @Override
-  public void with(String key, Object value) {
-    context.addParam(key, value);
   }
 
   @Override

@@ -21,12 +21,15 @@ public abstract class OperationContext implements AutoCloseable {
   }
 
   public OperationContext with(final String key, final Object value) {
-    state.with(key, value);
+    // state.with(key, value);
+    addParam(key, value);
     return this;
   }
 
   public OperationContext with(final Map<String, Object> keyValues) {
-    state.with(keyValues);
+//    state.with(keyValues);
+    addParam(keyValues);
+
     return this;
   }
 
@@ -104,8 +107,11 @@ public abstract class OperationContext implements AutoCloseable {
 
   @Override
   public void close() {
-    if (!(state instanceof FailState || state instanceof StartedState)) {
+    if (!(state instanceof FailState || state instanceof SuccessState)) {
       wasFailure("\"Programmer error: operation auto-closed before wasSuccessful() or wasFailure() called.\"");
     }
+
+    // We need to clear the reference
+    state = null;
   }
 }
