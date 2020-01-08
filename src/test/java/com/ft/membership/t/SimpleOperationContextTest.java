@@ -19,8 +19,7 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class SimpleOperationContextTest {
 
-  @Mock
-  Logger mockLogger;
+  @Mock Logger mockLogger;
 
   @Before
   public void setup() {
@@ -30,11 +29,11 @@ public class SimpleOperationContextTest {
   }
 
   @Test
-  public void log_start_and_success() throws Exception {
-
+  public void start_successful_operation() throws Exception {
     SimpleOperationContext.operation("compound_success", mockLogger).started().wasSuccessful();
 
     verify(mockLogger, times(2)).isInfoEnabled();
+
     verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
     verify(mockLogger)
         .info("operation=\"compound_success\" outcome=\"success\" operationState=\"success\"");
@@ -42,9 +41,22 @@ public class SimpleOperationContextTest {
   }
 
   @Test
-  public void compound_operation_should_have_fluent_api() throws Exception {
-    OperationContext operation =
-        operation("getUserSubscriptions", mockLogger).with("userId", "1234").started();
+  public void start_failure_operation() throws Exception {
+    SimpleOperationContext.operation("compound_success", mockLogger).started().wasFailure();
+
+    verify(mockLogger, times(1)).isInfoEnabled();
+    verify(mockLogger, times(1)).isErrorEnabled();
+
+    verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger)
+        .error("operation=\"compound_success\" outcome=\"failure\" operationState=\"fail\"");
+    verifyNoMoreInteractions(mockLogger);
+  }
+
+  @Test
+  public void multiple_operation_states() throws Exception {
+    OperationContext operation = operation("getUserSubscriptions", mockLogger)
+        .with("userId", "1234").started();
 
     operation.logDebug("The user has a lot of subscriptions");
     operation.with("activeSubscription", "S-12345");
@@ -64,10 +76,9 @@ public class SimpleOperationContextTest {
   }
 
   @Test
-  public void compound_operation_should_have_powerful_debug_capabilities() throws Exception {
-    OperationContext operation =
-        operation("getUserSubscriptions", mockLogger).with("userId", "1234").started();
-
+  public void debug_capabilities() throws Exception {
+    OperationContext operation = operation("getUserSubscriptions", mockLogger);
+    operation.with("userId", "1234").started();
     operation.logDebug(
         "The user has a lot of subscriptions", Collections.singletonMap("subscriptionCount", 999));
 
@@ -88,8 +99,16 @@ public class SimpleOperationContextTest {
     verifyNoMoreInteractions(mockLogger);
   }
 
+  @Test(expected = NullPointerException.class)
+  public void debug_when_finished_operation() {
+    OperationContext operation = operation("getUserSubscriptions", mockLogger).started();
+    operation.wasSuccessful();
+    operation.logDebug(
+        "The user has a lot of subscriptions", Collections.singletonMap("subscriptionCount", 999));
+  }
+
   @Test
-  public void log_simple_action() throws Exception {
+  public void create_action_with_no_operation() throws Exception {
     SimpleOperationContext.action("compound_action", mockLogger).started().wasSuccessful();
 
     verify(mockLogger, times(2)).isInfoEnabled();
@@ -100,7 +119,7 @@ public class SimpleOperationContextTest {
   }
 
   @Test
-  public void log_compound_operation_and_action() throws Exception {
+  public void create_action_with_operation() throws Exception {
     OperationContext operation =
         SimpleOperationContext.operation("compound_operation", mockLogger).started();
     doAction();
@@ -124,4 +143,47 @@ public class SimpleOperationContextTest {
     SimpleOperationContext.action("compound_action", mockLogger).started().wasSuccessful();
   }
 
+  @Test
+  public void finish_not_started_operation() throws Exception {
+    OperationContext operation =
+        SimpleOperationContext.operation("compound_operation", mockLogger);
+    doAction();
+    operation.wasSuccessful();
+
+    verify(mockLogger, times(3)).isInfoEnabled();
+    verify(mockLogger)
+        .info(
+            "action=\"compound_action\" operation=\"compound_operation\" operationState=\"started\"");
+    verify(mockLogger)
+        .info(
+            "action=\"compound_action\" outcome=\"success\" operation=\"compound_operation\" operationState=\"success\"");
+    verify(mockLogger)
+        .info("operation=\"compound_operation\" outcome=\"success\" operationState=\"success\"");
+
+    verifyNoMoreInteractions(mockLogger);
+  }
+
+  @Test
+  public void not_finished_operation() throws Exception {
+    try (OperationContext operation =
+        SimpleOperationContext.operation("compound_operation", mockLogger).started()) {
+      doAction();
+    }
+
+    verify(mockLogger, times(3)).isInfoEnabled();
+    verify(mockLogger, times(1)).isErrorEnabled();
+
+    verify(mockLogger).info("operation=\"compound_operation\" operationState=\"started\"");
+    verify(mockLogger)
+        .info(
+            "action=\"compound_action\" operation=\"compound_operation\" operationState=\"started\"");
+    verify(mockLogger)
+        .info(
+            "action=\"compound_action\" outcome=\"success\" operation=\"compound_operation\" operationState=\"success\"");
+    verify(mockLogger)
+        .error("operation=\"compound_operation\" outcome=\"failure\" operationState=\"fail\" "
+            + "result=\"Programmer error: operation auto-closed before wasSuccessful() or wasFailure() called.\"");
+
+    verifyNoMoreInteractions(mockLogger);
+  }
 }

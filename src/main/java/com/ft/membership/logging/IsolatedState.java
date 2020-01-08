@@ -1,8 +1,6 @@
 package com.ft.membership.logging;
 
 
-import java.util.Map;
-
 public class IsolatedState implements OperationState {
   private String type;
   private SimpleOperationContext context;
@@ -12,7 +10,6 @@ public class IsolatedState implements OperationState {
   private IsolatedState(SimpleOperationContext simpleOperationContext, String type) {
     context = simpleOperationContext;
     this.type = type;
-    context.setState(this);
   }
 
   @Override

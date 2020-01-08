@@ -4,6 +4,15 @@ import java.util.Collections;
 import java.util.Map;
 import org.slf4j.event.Level;
 
+/**
+ * {@code OperationContext} is the intended type to be interacted with when creating Operations
+ * Either use the factory methods of {@code SimpleOperationContext} or
+ * create your own implementation of this class that fits your needs.
+ * You can define new operation states by implementing {@code OperationState}.
+ * {@code OperationContext} objects are intended to be used with try-with-resources.
+ * When operation is closed it is assumed that they need to be either in {@code SuccessState} or
+ * {@code FailState}, if that is not the case with your use case overwrite the close method
+ */
 public abstract class OperationContext implements AutoCloseable {
 
   protected Parameters parameters;
@@ -11,7 +20,15 @@ public abstract class OperationContext implements AutoCloseable {
   protected Object actorOrLogger;
   protected OperationState state;
 
+  /**
+   * Method used to clear the context.
+   * Take care of any side-effects that we have introduced during the operation.
+   */
   protected abstract void clear();
+
+  public void logDebug(final String debugMessage) {
+    logDebug(debugMessage, Collections.emptyMap());
+  }
 
   public abstract void logDebug(final String debugMessage, final Map<String, Object> keyValues);
 
@@ -21,15 +38,12 @@ public abstract class OperationContext implements AutoCloseable {
   }
 
   public OperationContext with(final String key, final Object value) {
-    // state.with(key, value);
     addParam(key, value);
     return this;
   }
 
   public OperationContext with(final Map<String, Object> keyValues) {
-//    state.with(keyValues);
     addParam(keyValues);
-
     return this;
   }
 
@@ -40,11 +54,13 @@ public abstract class OperationContext implements AutoCloseable {
 
   public void wasSuccessful() {
     state.succeed();
+    clear();
   }
 
   public void wasSuccessful(final Object result) {
     with(Key.Result, result);
-    this.state.succeed();
+    state.succeed();
+    clear();
   }
 
   public void wasSuccessful(final Object result, final Level level) {
@@ -53,24 +69,34 @@ public abstract class OperationContext implements AutoCloseable {
 
   public void wasFailure() {
     state.fail();
+    clear();
   }
 
   public void wasFailure(final Object result) {
     with(Key.Result, result);
     state.fail();
+    clear();
   }
 
   public void wasFailure(final Object result, final Level level) {
     // TODO decide if we want to support different levels of result logs
   }
 
-  public void logDebug(final String debugMessage) {
-    logDebug(debugMessage, Collections.emptyMap());
-  }
-
 
   public void log(Level level) {
     log(null, level);
+  }
+
+  @Override
+  public void close() {
+    if (!(state instanceof FailState || state instanceof SuccessState)) {
+      wasFailure("Programmer error: operation auto-closed before wasSuccessful() or wasFailure() called.");
+    }
+
+    clear();
+
+    // We need to clear the reference
+    state = null;
   }
 
   void log(final Outcome outcome, final Level logLevel) {
@@ -105,13 +131,4 @@ public abstract class OperationContext implements AutoCloseable {
     parameters.putAll(keyValues);
   }
 
-  @Override
-  public void close() {
-    if (!(state instanceof FailState || state instanceof SuccessState)) {
-      wasFailure("\"Programmer error: operation auto-closed before wasSuccessful() or wasFailure() called.\"");
-    }
-
-    // We need to clear the reference
-    state = null;
-  }
 }

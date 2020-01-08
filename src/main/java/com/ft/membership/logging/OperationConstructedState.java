@@ -7,8 +7,6 @@ public class OperationConstructedState implements OperationState {
 
   OperationConstructedState(final SimpleOperationContext simpleOperationContext) {
     context = simpleOperationContext;
-    context.setState(this);
-
     context.addIdentity(context.getName());
   }
 

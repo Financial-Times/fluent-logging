@@ -11,11 +11,8 @@ public class SuccessState implements OperationState {
   SuccessState(SimpleOperationContext simpleOperationContext) {
     context = simpleOperationContext;
     type = context.getType();
-    context.setState(this);
     context.with(Key.OperationState, "success");
     context.log(Outcome.Success, Level.INFO);
-
-    context.clear();
   }
 
   @Override

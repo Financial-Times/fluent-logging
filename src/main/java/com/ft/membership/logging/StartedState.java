@@ -11,9 +11,7 @@ public class StartedState implements OperationState {
   StartedState(SimpleOperationContext simpleOperationContext) {
     context = simpleOperationContext;
     type = context.getType();
-    context.setState(this);
     context.with(Key.OperationState, "started");
-
     context.log(Level.INFO);
   }
 
@@ -29,7 +27,7 @@ public class StartedState implements OperationState {
 
   @Override
   public void succeed() {
-    new SuccessState(context);
+    context.setState(new SuccessState(context));
   }
 
   @Override

@@ -11,11 +11,8 @@ public class FailState implements OperationState {
   public FailState(SimpleOperationContext simpleOperationContext) {
     context = simpleOperationContext;
     type = context.getType();
-    context.setState(this);
     context.with(Key.OperationState, "fail");
-
     context.log(Outcome.Failure, Level.ERROR);
-    context.clear();
   }
 
   @Override
