@@ -14,9 +14,9 @@ package com.ft.membership.logging;
 public interface OperationState {
   String getType();
 
-  void start();
+  void start(OperationContext operationContext);
 
-  void succeed();
+  void succeed(OperationContext operationContext);
 
-  void fail();
+  void fail(OperationContext operationContext);
 }

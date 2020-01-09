@@ -23,6 +23,7 @@ public abstract class OperationContext implements AutoCloseable {
   /**
    * Method used to clear the context.
    * Take care of any side-effects that we have introduced during the operation.
+   * Do not call this method directly - finish the operation or at least use try with resources
    */
   protected abstract void clear();
 
@@ -48,18 +49,18 @@ public abstract class OperationContext implements AutoCloseable {
   }
 
   public OperationContext started() {
-    state.start();
+    state.start(this);
     return this;
   }
 
   public void wasSuccessful() {
-    state.succeed();
+    state.succeed(this);
     clear();
   }
 
   public void wasSuccessful(final Object result) {
     with(Key.Result, result);
-    state.succeed();
+    state.succeed(this);
     clear();
   }
 
@@ -68,13 +69,19 @@ public abstract class OperationContext implements AutoCloseable {
   }
 
   public void wasFailure() {
-    state.fail();
+    state.fail(this);
+    clear();
+  }
+
+  public void wasFailure(final Exception e) {
+    with(Key.ErrorMessage, e.getMessage());
+    state.fail(this);
     clear();
   }
 
   public void wasFailure(final Object result) {
     with(Key.Result, result);
-    state.fail();
+    state.fail(this);
     clear();
   }
 
@@ -82,9 +89,12 @@ public abstract class OperationContext implements AutoCloseable {
     // TODO decide if we want to support different levels of result logs
   }
 
-
   public void log(Level level) {
     log(null, level);
+  }
+
+  public void log(final Outcome outcome, final Level logLevel) {
+    new LogFormatter(actorOrLogger).log(this, outcome, logLevel);
   }
 
   @Override
@@ -97,10 +107,6 @@ public abstract class OperationContext implements AutoCloseable {
 
     // We need to clear the reference
     state = null;
-  }
-
-  void log(final Outcome outcome, final Level logLevel) {
-    new LogFormatter(actorOrLogger).log(this, outcome, logLevel);
   }
 
   String getName() {

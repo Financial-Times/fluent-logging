@@ -24,14 +24,14 @@ public final class SimpleOperationContext extends OperationContext {
   public static SimpleOperationContext operation(final String name, final Object actorOrLogger) {
     checkNotNull(name, "require name");
     final SimpleOperationContext context = new SimpleOperationContext(name, actorOrLogger, null);
-    context.setState(new OperationConstructedState(context));
+    context.setState(OperationConstructedState.from(context));
     return context;
   }
 
   public static SimpleOperationContext action(final String name, final Object actorOrLogger) {
     checkNotNull(name, "require name");
     final SimpleOperationContext context = new SimpleOperationContext(name, actorOrLogger, null);
-    context.setState(new ActionConstructedState(context));
+    context.setState(ActionConstructedState.from(context));
 
     final String operation = MDC.get("operation");
     if (Objects.nonNull(operation) && !operation.isEmpty()) {
@@ -44,19 +44,17 @@ public final class SimpleOperationContext extends OperationContext {
   public void logDebug(final String debugMessage, final Map<String, Object> keyValues) {
     checkNotNull(state, "operation is already closed");
 
-    SimpleOperationContext debugSimpleOperationContext = new SimpleOperationContext(
-        name,
-        actorOrLogger,
-        parameters.getParameters()
-    );
-
-    IsolatedState isolatedState = IsolatedState.from(debugSimpleOperationContext, state.getType());
-    debugSimpleOperationContext.setState(isolatedState);
+    SimpleOperationContext debugSimpleOperationContext = getIsolatedOperationContext();
 
     debugSimpleOperationContext.with(Key.DebugMessage, debugMessage);
     debugSimpleOperationContext.with(keyValues);
 
     new LogFormatter(actorOrLogger).log(debugSimpleOperationContext, null, Level.DEBUG);
+  }
+
+  // Needed for linking operations with actions
+  void addIdentity(final String name) {
+    MDC.put("operation", name);
   }
 
   @Override
@@ -69,17 +67,15 @@ public final class SimpleOperationContext extends OperationContext {
     state = null;
   }
 
-  // Needed for linking operations with actions
-  void addIdentity(final String name) {
-    MDC.put("operation", name);
-  }
+  private SimpleOperationContext getIsolatedOperationContext() {
+    SimpleOperationContext debugSimpleOperationContext = new SimpleOperationContext(
+        name,
+        actorOrLogger,
+        parameters.getParameters()
+    );
 
-  private void logError(Object actorOrLogger) {
-    new LogFormatter(actorOrLogger).log(this, Outcome.Failure, Level.ERROR);
+    IsolatedState isolatedState = IsolatedState.of(this, state.getType());
+    debugSimpleOperationContext.setState(isolatedState);
+    return debugSimpleOperationContext;
   }
-
-  private void logInfo(Object actorOrLogger) {
-    new LogFormatter(actorOrLogger).log(this, null, Level.INFO);
-  }
-
 }

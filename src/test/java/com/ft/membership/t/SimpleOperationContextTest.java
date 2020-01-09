@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import com.ft.membership.logging.OperationContext;
 import com.ft.membership.logging.SimpleOperationContext;
 import java.util.Collections;
+import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +30,7 @@ public class SimpleOperationContextTest {
   }
 
   @Test
-  public void start_successful_operation() throws Exception {
+  public void start_successful_operation() {
     SimpleOperationContext.operation("compound_success", mockLogger).started().wasSuccessful();
 
     verify(mockLogger, times(2)).isInfoEnabled();
@@ -41,7 +42,7 @@ public class SimpleOperationContextTest {
   }
 
   @Test
-  public void start_failure_operation() throws Exception {
+  public void start_failure_operation() {
     SimpleOperationContext.operation("compound_success", mockLogger).started().wasFailure();
 
     verify(mockLogger, times(1)).isInfoEnabled();
@@ -54,7 +55,36 @@ public class SimpleOperationContextTest {
   }
 
   @Test
-  public void multiple_operation_states() throws Exception {
+  public void exception_failure_operation() {
+    SimpleOperationContext.operation("compound_success", mockLogger)
+        .wasFailure(new IllegalStateException("exception_failure_operation"));
+
+    verify(mockLogger, times(1)).isErrorEnabled();
+    verify(mockLogger)
+        .error(
+            "operation=\"compound_success\" outcome=\"failure\" "
+                + "errorMessage=\"exception_failure_operation\" operationState=\"fail\"");
+    verifyNoMoreInteractions(mockLogger);
+  }
+
+  @Test
+  public void multiple_operation_params() {
+    HashMap params = new HashMap();
+    params.put("activeSubscription", "S-12345");
+    params.put("userId", "1234");
+
+    operation("getUserSubscriptions", mockLogger).with(params).started().wasSuccessful();
+    verify(mockLogger, times(2)).isInfoEnabled();
+    verify(mockLogger)
+        .info(
+            "operation=\"getUserSubscriptions\" userId=\"1234\" activeSubscription=\"S-12345\" operationState=\"started\"");
+    verify(mockLogger)
+        .info(
+            "operation=\"getUserSubscriptions\" outcome=\"success\" userId=\"1234\" activeSubscription=\"S-12345\" operationState=\"success\"");
+  }
+
+  @Test
+  public void multiple_operation_states() {
     OperationContext operation = operation("getUserSubscriptions", mockLogger)
         .with("userId", "1234").started();
 
@@ -76,7 +106,7 @@ public class SimpleOperationContextTest {
   }
 
   @Test
-  public void debug_capabilities() throws Exception {
+  public void debug_capabilities() {
     OperationContext operation = operation("getUserSubscriptions", mockLogger);
     operation.with("userId", "1234").started();
     operation.logDebug(
@@ -108,7 +138,7 @@ public class SimpleOperationContextTest {
   }
 
   @Test
-  public void create_action_with_no_operation() throws Exception {
+  public void create_action_with_no_operation() {
     SimpleOperationContext.action("compound_action", mockLogger).started().wasSuccessful();
 
     verify(mockLogger, times(2)).isInfoEnabled();
@@ -119,7 +149,7 @@ public class SimpleOperationContextTest {
   }
 
   @Test
-  public void create_action_with_operation() throws Exception {
+  public void create_action_with_operation() {
     OperationContext operation =
         SimpleOperationContext.operation("compound_operation", mockLogger).started();
     doAction();
@@ -144,7 +174,7 @@ public class SimpleOperationContextTest {
   }
 
   @Test
-  public void finish_not_started_operation() throws Exception {
+  public void finish_not_started_operation() {
     OperationContext operation =
         SimpleOperationContext.operation("compound_operation", mockLogger);
     doAction();
@@ -164,7 +194,7 @@ public class SimpleOperationContextTest {
   }
 
   @Test
-  public void not_finished_operation() throws Exception {
+  public void not_finished_operation() {
     try (OperationContext operation =
         SimpleOperationContext.operation("compound_operation", mockLogger).started()) {
       doAction();

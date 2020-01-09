@@ -6,10 +6,8 @@ import java.util.Map;
 
 public class FailState implements OperationState {
   private final String type;
-  private SimpleOperationContext context;
 
-  public FailState(SimpleOperationContext simpleOperationContext) {
-    context = simpleOperationContext;
+  public FailState(OperationContext context) {
     type = context.getType();
     context.with(Key.OperationState, "fail");
     context.log(Outcome.Failure, Level.ERROR);
@@ -21,11 +19,15 @@ public class FailState implements OperationState {
   }
 
   @Override
-  public void start() {}
+  public void start(final OperationContext context) {}
 
   @Override
-  public void succeed() {}
+  public void succeed(final OperationContext context) {}
 
   @Override
-  public void fail() {}
+  public void fail(final OperationContext context) {}
+
+  public static OperationState of(final OperationContext context) {
+    return new FailState(context);
+  }
 }

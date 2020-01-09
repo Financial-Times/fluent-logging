@@ -3,14 +3,14 @@ package com.ft.membership.logging;
 
 public class IsolatedState implements OperationState {
   private String type;
-  private SimpleOperationContext context;
 
   // Use the static factory method
   private IsolatedState() {}
-  private IsolatedState(SimpleOperationContext simpleOperationContext, String type) {
-    context = simpleOperationContext;
+  private IsolatedState(SimpleOperationContext context, String type) {
     this.type = type;
   }
+
+
 
   @Override
   public String getType() {
@@ -18,15 +18,15 @@ public class IsolatedState implements OperationState {
   }
 
   @Override
-  public void start() {}
+  public void start(OperationContext context) {}
 
   @Override
-  public void succeed() {}
+  public void succeed(OperationContext context) {}
 
   @Override
-  public void fail() {}
+  public void fail(OperationContext context) {}
 
-  public static IsolatedState from(SimpleOperationContext context, String type) {
+  public static IsolatedState of(SimpleOperationContext context, String type) {
     return new IsolatedState(context, type);
   }
 }

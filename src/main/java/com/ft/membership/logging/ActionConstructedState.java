@@ -1,12 +1,10 @@
 package com.ft.membership.logging;
 
 public class ActionConstructedState implements OperationState {
-  private SimpleOperationContext context;
-  private final String type = "action";
+  private static final String type = "action";
+  private static final ActionConstructedState INSTANCE = new ActionConstructedState();
 
-  ActionConstructedState(SimpleOperationContext simpleOperationContext) {
-    context = simpleOperationContext;
-  }
+  private ActionConstructedState() {}
 
   @Override
   public String getType() {
@@ -14,17 +12,21 @@ public class ActionConstructedState implements OperationState {
   }
 
   @Override
-  public void start() {
-    context.setState(new StartedState(context));
+  public void start(final OperationContext context) {
+    context.setState(StartedState.of(context));
   }
 
   @Override
-  public void succeed() {
-    context.setState(new SuccessState(context));
+  public void succeed(final OperationContext context) {
+    context.setState(SuccessState.of(context));
   }
 
   @Override
-  public void fail() {
-    context.setState(new FailState(context));
+  public void fail(final OperationContext context) {
+    context.setState(FailState.of(context));
+  }
+
+  static ActionConstructedState from(final SimpleOperationContext context) {
+   return INSTANCE;
   }
 }

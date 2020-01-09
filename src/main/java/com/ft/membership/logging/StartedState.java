@@ -6,10 +6,8 @@ import java.util.Map;
 
 public class StartedState implements OperationState {
   private String type;
-  private SimpleOperationContext context;
 
-  StartedState(SimpleOperationContext simpleOperationContext) {
-    context = simpleOperationContext;
+  protected StartedState(OperationContext context) {
     type = context.getType();
     context.with(Key.OperationState, "started");
     context.log(Level.INFO);
@@ -21,17 +19,21 @@ public class StartedState implements OperationState {
   }
 
   @Override
-  public void start() {
+  public void start(OperationContext context) {
     // already started
   }
 
   @Override
-  public void succeed() {
-    context.setState(new SuccessState(context));
+  public void succeed(OperationContext context) {
+    context.setState(SuccessState.of(context));
   }
 
   @Override
-  public void fail() {
-    context.setState(new FailState(context));
+  public void fail(OperationContext context) {
+    context.setState(FailState.of(context));
+  }
+
+  static StartedState of(final OperationContext context) {
+    return new StartedState(context);
   }
 }
