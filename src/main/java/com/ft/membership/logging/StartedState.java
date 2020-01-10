@@ -19,7 +19,7 @@ public class StartedState implements OperationState {
 
   static StartedState from(final OperationContext context) {
     context.with(Key.OperationState, "started");
-    context.log(Level.INFO);
+    context.log();
 
     return INSTANCE;
   }

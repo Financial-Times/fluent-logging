@@ -19,6 +19,11 @@ import org.slf4j.event.Level;
  */
 public abstract class OperationContext implements AutoCloseable {
   /**
+   * The default log level that will be used for operations different then error
+   */
+  private static Level defaultLevel = Level.INFO;
+
+  /**
    * Gives ability to set default layout of the output. One option is key=value, while the other
    * is {"key":"value"}
    * The layout is valid for all following operations.
@@ -41,6 +46,7 @@ public abstract class OperationContext implements AutoCloseable {
   protected Parameters parameters;
   protected Object actorOrLogger;
   protected OperationState state;
+  protected Level level;
 
   /**
    * Method used to clear the context.
@@ -48,6 +54,10 @@ public abstract class OperationContext implements AutoCloseable {
    * Do not call this method directly - finish the operation or at least use try with resources
    */
   protected abstract void clear();
+
+  public static void changeDefaultLevel(final Level level) {
+    defaultLevel = level;
+  }
 
   public static void changeDefaultLayout(final Layout layout) {
     defaultLayout = layout;
@@ -99,6 +109,11 @@ public abstract class OperationContext implements AutoCloseable {
     return this;
   }
 
+  public OperationContext at(final Level level) {
+    this.level = level;
+    return this;
+  }
+
   public OperationContext with(final Key key, final Object value) {
     return with(key.getKey(), value);
   }
@@ -129,10 +144,6 @@ public abstract class OperationContext implements AutoCloseable {
     clear();
   }
 
-  public void wasSuccessful(final Object result, final Level level) {
-    // TODO decide if we want to support different levels of result logs
-  }
-
   public void wasFailure() {
     state.fail(this);
     clear();
@@ -150,16 +161,21 @@ public abstract class OperationContext implements AutoCloseable {
     clear();
   }
 
-  public void wasFailure(final Object result, final Level level) {
-    // TODO decide if we want to support different levels of result logs
+  public void log() {
+    log(null, Objects.isNull(this.level) ? defaultLevel : this.level);
+  }
+
+  public void log(final Outcome outcome) {
+    log(outcome, Objects.isNull(this.level) ? defaultLevel : this.level);
   }
 
   public void log(Level level) {
-    log(null, level);
+    log(null, Objects.isNull(this.level) ? level : this.level);
   }
 
   public void log(final Outcome outcome, final Level logLevel) {
-    new LogFormatter(actorOrLogger).log(this, outcome, logLevel, layout);
+    new LogFormatter(actorOrLogger)
+        .log(this, outcome, Objects.isNull(this.level) ? logLevel : this.level, layout);
   }
 
   @Override

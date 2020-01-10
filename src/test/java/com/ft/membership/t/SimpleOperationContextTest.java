@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
+import org.slf4j.event.Level;
 import sun.jvm.hotspot.utilities.Assert;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -33,7 +34,10 @@ public class SimpleOperationContextTest {
     Mockito.when(mockLogger.isInfoEnabled()).thenReturn(true);
     Mockito.when(mockLogger.isErrorEnabled()).thenReturn(true);
     Mockito.when(mockLogger.isDebugEnabled()).thenReturn(true);
+    Mockito.when(mockLogger.isWarnEnabled()).thenReturn(true);
 
+
+    SimpleOperationContext.changeDefaultLevel(Level.INFO);
     SimpleOperationContext.changeDefaultLayout(Layout.KeyValuePair);
     SimpleOperationContext.changeDefaultKeyRegex(KeyRegex.CamelCase);
   }
@@ -47,6 +51,19 @@ public class SimpleOperationContextTest {
     verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
     verify(mockLogger)
         .info("operation=\"compound_success\" operationState=\"success\" outcome=\"success\"");
+    verifyNoMoreInteractions(mockLogger);
+  }
+
+  @Test
+  public void success_with_result() {
+    operation("compound_success", mockLogger).started().wasSuccessful("42");
+
+    verify(mockLogger, times(2)).isInfoEnabled();
+
+    verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger)
+        .info(
+            "operation=\"compound_success\" operationState=\"success\" result=\"42\" outcome=\"success\"");
     verifyNoMoreInteractions(mockLogger);
   }
 
@@ -336,5 +353,68 @@ public class SimpleOperationContextTest {
         .started()
         .with("InvalidKey", "1")
         .wasSuccessful();
+  }
+
+  @Test()
+  public void at_warn_level() {
+    operation("compound_success", mockLogger).at(Level.WARN).started().wasSuccessful();
+
+    verify(mockLogger, times(2)).isWarnEnabled();
+
+    verify(mockLogger).warn("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger)
+        .warn("operation=\"compound_success\" operationState=\"success\" outcome=\"success\"");
+    verifyNoMoreInteractions(mockLogger);
+  }
+
+  @Test
+  public void at_different_level() {
+    operation("compound_success", mockLogger).started().at(Level.WARN).wasSuccessful();
+
+    verify(mockLogger, times(1)).isInfoEnabled();
+    verify(mockLogger, times(1)).isWarnEnabled();
+
+    verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger)
+        .warn("operation=\"compound_success\" operationState=\"success\" outcome=\"success\"");
+    verifyNoMoreInteractions(mockLogger);
+  }
+
+  @Test
+  public void at_same_level() {
+    operation("compound_success", mockLogger).started().at(Level.INFO).wasSuccessful();
+
+    verify(mockLogger, times(2)).isInfoEnabled();
+
+    verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger)
+        .info("operation=\"compound_success\" operationState=\"success\" outcome=\"success\"");
+    verifyNoMoreInteractions(mockLogger);
+  }
+
+  @Test
+  public void at_disabled_level() {
+    Mockito.when(mockLogger.isTraceEnabled()).thenReturn(false);
+
+    operation("compound_success", mockLogger).started().at(Level.TRACE).wasSuccessful();
+
+    verify(mockLogger, times(1)).isInfoEnabled();
+    verify(mockLogger, times(1)).isTraceEnabled();
+
+    verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
+    verifyNoMoreInteractions(mockLogger);
+  }
+
+  @Test
+  public void change_default_level() {
+    SimpleOperationContext.changeDefaultLevel(Level.WARN);
+    operation("compound_success", mockLogger).started().wasSuccessful();
+
+    verify(mockLogger, times(2)).isWarnEnabled();
+
+    verify(mockLogger).warn("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger)
+        .warn("operation=\"compound_success\" operationState=\"success\" outcome=\"success\"");
+    verifyNoMoreInteractions(mockLogger);
   }
 }

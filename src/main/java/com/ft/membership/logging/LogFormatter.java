@@ -2,6 +2,8 @@ package com.ft.membership.logging;
 
 import static com.ft.membership.logging.LogFormatter.NameAndValue.nameAndValue;
 import static com.ft.membership.logging.Preconditions.checkNotNull;
+import static org.slf4j.event.Level.DEBUG;
+import static org.slf4j.event.Level.TRACE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,6 +67,16 @@ public class LogFormatter {
       case ERROR:
         if (logger.isErrorEnabled()) {
           logger.error(buildMsg(msgParams, ERROR, layout));
+        }
+        break;
+      case WARN:
+        if (logger.isWarnEnabled()) {
+          logger.warn(buildMsg(msgParams, WARN, layout));
+        }
+        break;
+      case TRACE:
+        if (logger.isTraceEnabled()) {
+          logger.trace(buildMsg(msgParams, TRACE.toString(), layout));
         }
         break;
       default:
