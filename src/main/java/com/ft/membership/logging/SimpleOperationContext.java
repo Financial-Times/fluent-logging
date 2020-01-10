@@ -28,7 +28,7 @@ public final class SimpleOperationContext extends OperationContext {
     checkNotNull(name, "require name");
     final SimpleOperationContext context =
         new SimpleOperationContext(name, "operation", actorOrLogger, null);
-    context.setState(OperationConstructedState.from(context));
+    context.changeState(OperationConstructedState.from(context));
     context.with(Key.Operation, name);
     return context;
   }
@@ -37,7 +37,7 @@ public final class SimpleOperationContext extends OperationContext {
     checkNotNull(name, "require name");
     final SimpleOperationContext context =
         new SimpleOperationContext(name, "action", actorOrLogger, null);
-    context.setState(ActionConstructedState.from(context));
+    context.changeState(ActionConstructedState.from(context));
 
     final String operation = MDC.get("operation");
     if (Objects.nonNull(operation) && !operation.isEmpty()) {
@@ -57,7 +57,7 @@ public final class SimpleOperationContext extends OperationContext {
     debugSimpleOperationContext.with(Key.DebugMessage, debugMessage);
     debugSimpleOperationContext.with(keyValues);
 
-    new LogFormatter(actorOrLogger).log(debugSimpleOperationContext, null, Level.DEBUG);
+    debugSimpleOperationContext.log(null, Level.DEBUG);
   }
 
   // Needed for linking operations with actions
@@ -83,8 +83,8 @@ public final class SimpleOperationContext extends OperationContext {
         parameters.getParameters()
     );
 
-    IsolatedState isolatedState = IsolatedState.of(this, type);
-    debugSimpleOperationContext.setState(isolatedState);
+    IsolatedState isolatedState = IsolatedState.from(this);
+    debugSimpleOperationContext.changeState(isolatedState);
     return debugSimpleOperationContext;
   }
 }

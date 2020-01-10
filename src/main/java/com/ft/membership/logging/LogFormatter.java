@@ -42,31 +42,12 @@ public class LogFormatter {
     }
   }
 
-  void logStart(final Operation operation) {
-    final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
-    addOperation(operation, msgParams);
-    addOperationParameters(operation, msgParams);
-    if (logger.isInfoEnabled()) {
-      logger.info(buildMsg(operation, msgParams, INFO));
-    }
-  }
-
-  void logStart(final OperationContext operation) {
-    final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
-    //addOperationType(operation, msgParams);
-    addOperationParameters(operation, msgParams);
-    if (logger.isInfoEnabled()) {
-      logger.info(buildMsgString(msgParams));
-    }
-  }
-
-  void logSuccess(final OperationContext operation) {
-    log(operation, Outcome.Success, Level.INFO);
-  }
-
-  void log(final OperationContext operation, final Outcome outcome, final Level logLevel) {
-    final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
-    //addOperationType(operation, msgParams);
+  void log(
+      final OperationContext operation,
+      final Outcome outcome,
+      final Level logLevel,
+      final Layout layout) {
+    final Collection<NameAndValue> msgParams = new ArrayList<>();
 
     addOperationParameters(operation, msgParams);
 
@@ -77,21 +58,34 @@ public class LogFormatter {
     switch (logLevel) {
       case DEBUG:
         if (logger.isDebugEnabled()) {
-          logger.debug(buildMsgString(msgParams));
+          logger.debug(buildMsg(msgParams, DEBUG, layout));
         }
         break;
       case ERROR:
         if (logger.isErrorEnabled()) {
-          logger.error(buildMsgString(msgParams));
+          logger.error(buildMsg(msgParams, ERROR, layout));
         }
         break;
       default:
         if (logger.isInfoEnabled()) {
-          logger.info(buildMsgString(msgParams));
+          logger.info(buildMsg(msgParams, INFO, layout));
         }
     }
   }
 
+  private String buildMsg(
+      final Collection<NameAndValue> msgParams, String logLevel, Layout layout) {
+    return layout == Layout.Json ? buildMsgJson(msgParams, logLevel) : buildMsgString(msgParams);
+  }
+
+  void logStart(final Operation operation) {
+    final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
+    addOperation(operation, msgParams);
+    addOperationParameters(operation, msgParams);
+    if (logger.isInfoEnabled()) {
+      logger.info(buildMsg(operation, msgParams, INFO));
+    }
+  }
 
   void logInfo(final Operation operation, final Outcome outcome) {
     operation.terminated();
@@ -235,7 +229,6 @@ public class LogFormatter {
   }
 
   private String buildMsgJson(final Collection<NameAndValue> msgParams, String logLevel) {
-
     addLogLevalAndTime(msgParams, logLevel);
     Map<String, Object> map = new HashMap<>();
     msgParams.stream()

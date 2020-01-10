@@ -12,9 +12,13 @@ package com.ft.membership.logging;
  */
 public interface OperationState {
 
-  void start(OperationContext operationContext);
+  default void start(OperationContext operationContext) { }
 
-  void succeed(OperationContext operationContext);
+  default void succeed(OperationContext operationContext) { }
 
-  void fail(OperationContext operationContext);
+  default void fail(OperationContext operationContext) { }
+
+  default void changeState(OperationContext operationContext, OperationState operationState) {
+    operationContext.changeState(operationState);
+  }
 }

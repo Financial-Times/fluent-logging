@@ -7,17 +7,17 @@ public class OperationConstructedState implements OperationState {
 
   @Override
   public void start(final OperationContext context) {
-    context.setState(StartedState.of(context));
+    changeState(context, StartedState.from(context));
   }
 
   @Override
   public void succeed(final OperationContext context) {
-    context.setState(SuccessState.of(context));
+    changeState(context, SuccessState.from(context));
   }
 
   @Override
   public void fail(final OperationContext context) {
-    context.setState(FailState.of(context));
+    changeState(context, FailState.from(context));
   }
 
   static OperationConstructedState from(final SimpleOperationContext context) {

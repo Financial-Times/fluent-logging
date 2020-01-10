@@ -9,16 +9,7 @@ public class SuccessState implements OperationState {
 
   private SuccessState() {}
 
-  @Override
-  public void start(final OperationContext context) {}
-
-  @Override
-  public void succeed(final OperationContext context) {}
-
-  @Override
-  public void fail(final OperationContext context) {}
-
-  static SuccessState of(final OperationContext context) {
+  static SuccessState from(final OperationContext context) {
     context.with(Key.OperationState, "success");
     context.log(Outcome.Success, Level.INFO);
 

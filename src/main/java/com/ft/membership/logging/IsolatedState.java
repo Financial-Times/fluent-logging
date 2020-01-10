@@ -7,16 +7,7 @@ public class IsolatedState implements OperationState {
   // Use the static factory method
   private IsolatedState() {}
 
-  @Override
-  public void start(OperationContext context) {}
-
-  @Override
-  public void succeed(OperationContext context) {}
-
-  @Override
-  public void fail(OperationContext context) {}
-
-  public static IsolatedState of(SimpleOperationContext context, String type) {
+  public static IsolatedState from(SimpleOperationContext context) {
     return INSTANCE;
   }
 }

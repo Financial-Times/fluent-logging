@@ -14,11 +14,14 @@ import org.slf4j.event.Level;
  * {@code FailState}, if that is not the case with your use case overwrite the close method
  */
 public abstract class OperationContext implements AutoCloseable {
+  private static Layout defaultLayout = Layout.KeyValuePair;
 
   protected Parameters parameters;
   protected String name;
   protected Object actorOrLogger;
   protected OperationState state;
+  protected Layout layout = defaultLayout;
+
 
   /**
    * Method used to clear the context.
@@ -27,12 +30,30 @@ public abstract class OperationContext implements AutoCloseable {
    */
   protected abstract void clear();
 
+  public static void changeDefaultLayout(final Layout layout) {
+    defaultLayout = layout;
+  }
+
   public void logDebug(final String debugMessage) {
     logDebug(debugMessage, Collections.emptyMap());
   }
 
   public abstract void logDebug(final String debugMessage, final Map<String, Object> keyValues);
 
+  public OperationContext as(final Layout layout) {
+    this.layout = layout;
+    return this;
+  }
+
+  public OperationContext asJson() {
+    this.layout = Layout.Json;
+    return this;
+  }
+
+  public OperationContext asKeyValuePairs() {
+    this.layout = Layout.KeyValuePair;
+    return this;
+  }
 
   public OperationContext with(final Key key, final Object value) {
     return with(key.getKey(), value);
@@ -94,7 +115,7 @@ public abstract class OperationContext implements AutoCloseable {
   }
 
   public void log(final Outcome outcome, final Level logLevel) {
-    new LogFormatter(actorOrLogger).log(this, outcome, logLevel);
+    new LogFormatter(actorOrLogger).log(this, outcome, logLevel, layout);
   }
 
   @Override
@@ -121,12 +142,8 @@ public abstract class OperationContext implements AutoCloseable {
     return actorOrLogger;
   }
 
-//  String getType() {
-//    return this.state.getType();
-//  }
-
-  void setState(OperationState operationState) {
-    this.state = operationState;
+  void changeState(OperationState operationState) {
+    state = operationState;
   };
 
   void addParam(final String key, final Object value) {
