@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -216,16 +217,9 @@ public class LogFormatter {
   }
 
   private String buildMsgString(final Collection<NameAndValue> msgParams) {
-    final StringBuilder sb = new StringBuilder();
-    boolean addSeperator = false;
-    for (NameAndValue msgParam : msgParams) {
-      if (addSeperator) {
-        sb.append(" ");
-      }
-      sb.append(msgParam);
-      addSeperator = true;
-    }
-    return sb.toString();
+    return msgParams.stream().map(
+        param -> param.toString()
+    ).collect(Collectors.joining(" "));
   }
 
   private String buildMsgJson(final Collection<NameAndValue> msgParams, String logLevel) {
@@ -248,10 +242,6 @@ public class LogFormatter {
 
   private void addOperation(final Operation operation, final Collection<NameAndValue> msgParams) {
     msgParams.add(nameAndValue("operation", operation.getName()));
-  }
-
-  private void addOperationType(final OperationContext operation, final Collection<NameAndValue> msgParams) {
-  //  msgParams.add(nameAndValue(operation.getType(), operation.getName()));
   }
 
   private void addOperationParameters(final Operation operation,

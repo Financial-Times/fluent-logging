@@ -1,7 +1,11 @@
 package com.ft.membership.logging;
 
+import static com.ft.membership.logging.Preconditions.checkNotNull;
+
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Pattern;
 import org.slf4j.event.Level;
 
 /**
@@ -14,14 +18,29 @@ import org.slf4j.event.Level;
  * {@code FailState}, if that is not the case with your use case overwrite the close method
  */
 public abstract class OperationContext implements AutoCloseable {
+  /**
+   * Gives ability to set default layout of the output. One option is key=value, while the other
+   * is {"key":"value"}
+   * The layout is valid for all following operations.
+   * It could be overwritten for specific operation.
+  */
   private static Layout defaultLayout = Layout.KeyValuePair;
 
-  protected Parameters parameters;
+  /**
+   * Gives ability to set default validation pattern for keys/fields.
+   * Just as defaultLayout it could be overwritten.
+   * One option currently exists - KeyRegex.CamelCase.
+   * Could be set or disabled globally or per operation.
+   */
+  private static Pattern defaultKeyRegexPattern;
+
+  protected Layout layout = defaultLayout;
+  protected Pattern keyRegexPattern = defaultKeyRegexPattern;
+
   protected String name;
+  protected Parameters parameters;
   protected Object actorOrLogger;
   protected OperationState state;
-  protected Layout layout = defaultLayout;
-
 
   /**
    * Method used to clear the context.
@@ -32,6 +51,16 @@ public abstract class OperationContext implements AutoCloseable {
 
   public static void changeDefaultLayout(final Layout layout) {
     defaultLayout = layout;
+  }
+  public static void changeDefaultKeyRegex(final String pattern) {
+    checkNotNull(pattern, "pass a valid regex");
+    defaultKeyRegexPattern = Pattern.compile(pattern);
+  }
+  public static void changeDefaultKeyRegex(final KeyRegex keyRegex) {
+    defaultKeyRegexPattern = Pattern.compile(keyRegex.getRegex());
+  }
+  public static void disableDefaultKeyValidation() {
+    defaultKeyRegexPattern = null;
   }
 
   public void logDebug(final String debugMessage) {
@@ -52,6 +81,21 @@ public abstract class OperationContext implements AutoCloseable {
 
   public OperationContext asKeyValuePairs() {
     this.layout = Layout.KeyValuePair;
+    return this;
+  }
+
+  public OperationContext disableKeyValidation() {
+    keyRegexPattern = null;
+    return this;
+  }
+
+  public OperationContext validate(final KeyRegex keyRegex) {
+    keyRegexPattern = Pattern.compile(keyRegex.getRegex());
+    return this;
+  }
+
+  public OperationContext validate(final String regex) {
+    keyRegexPattern = Pattern.compile(regex);
     return this;
   }
 
@@ -147,6 +191,10 @@ public abstract class OperationContext implements AutoCloseable {
   };
 
   void addParam(final String key, final Object value) {
+    if (!Objects.isNull(keyRegexPattern) && !keyRegexPattern.matcher(key).matches()) {
+      throw new AssertionError(key + " does not match " + keyRegexPattern.toString());
+    }
+
     parameters.put(key, value);
   }
 

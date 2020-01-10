@@ -1,12 +1,16 @@
 package com.ft.membership.t;
 
+import static com.ft.membership.logging.OperationContext.disableDefaultKeyValidation;
 import static com.ft.membership.logging.SimpleOperationContext.action;
 import static com.ft.membership.logging.SimpleOperationContext.operation;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import com.ft.membership.logging.KeyRegex;
+import com.ft.membership.logging.Layout;
 import com.ft.membership.logging.OperationContext;
+import com.ft.membership.logging.SimpleOperationContext;
 import java.util.Collections;
 import java.util.HashMap;
 import org.junit.Before;
@@ -29,6 +33,9 @@ public class SimpleOperationContextTest {
     Mockito.when(mockLogger.isInfoEnabled()).thenReturn(true);
     Mockito.when(mockLogger.isErrorEnabled()).thenReturn(true);
     Mockito.when(mockLogger.isDebugEnabled()).thenReturn(true);
+
+    SimpleOperationContext.changeDefaultLayout(Layout.KeyValuePair);
+    SimpleOperationContext.changeDefaultKeyRegex(KeyRegex.CamelCase);
   }
 
   @Test
@@ -87,8 +94,8 @@ public class SimpleOperationContextTest {
 
   @Test
   public void multiple_operation_states() {
-    OperationContext operation = operation("getUserSubscriptions", mockLogger)
-        .with("userId", "1234").started();
+    OperationContext operation =
+        operation("getUserSubscriptions", mockLogger).with("userId", "1234").started();
 
     operation.logDebug("The user has a lot of subscriptions");
     operation.with("activeSubscription", "S-12345");
@@ -219,40 +226,115 @@ public class SimpleOperationContextTest {
   }
 
   @Test
+  public void as_layout() {
+    SimpleOperationContext.changeDefaultLayout(Layout.Json);
+    operation("simple_op", mockLogger).as(Layout.KeyValuePair).started().wasSuccessful();
+
+    verify(mockLogger, times(2)).isInfoEnabled();
+    verify(mockLogger).info("operation=\"simple_op\" operationState=\"started\"");
+  }
+
+  @Test
   public void simple_json_layout() {
     operation("compound_success", mockLogger).asJson().started().wasSuccessful();
 
     verify(mockLogger, times(2)).isInfoEnabled();
 
     ArgumentCaptor<String> lines = ArgumentCaptor.forClass(String.class);
-    verify(mockLogger, times(2))
-        .info(lines.capture());
+    verify(mockLogger, times(2)).info(lines.capture());
 
     final String line1 = lines.getAllValues().get(0);
-    System.out.println(line1);
     Assert.that(line1.contains("\"logLevel\":\"INFO\""), line1 + " must contain logLevel");
     Assert.that(
-        line1.contains("\"operation\":\"compound_success\""),
-        line1 + " must contain operation");
+        line1.contains("\"operation\":\"compound_success\""), line1 + " must contain operation");
     Assert.that(
-        line1.contains("\"operationState\":\"started\""),
-        line1 + " must contain operationState");
-    Assert.that(
-        !line1.contains("\"outcome\":\"success\""), line1 + " must not contain outcome");
+        line1.contains("\"operationState\":\"started\""), line1 + " must contain operationState");
+    Assert.that(!line1.contains("\"outcome\":\"success\""), line1 + " must not contain outcome");
 
     final String line2 = lines.getAllValues().get(1);
-    System.out.println(line2);
     Assert.that(line2.contains("\"logLevel\":\"INFO\""), line2 + " must contain logLevel");
     Assert.that(
-        line2.contains("\"operation\":\"compound_success\""),
-        line2 + " must contain operation");
+        line2.contains("\"operation\":\"compound_success\""), line2 + " must contain operation");
     Assert.that(
-        line2.contains("\"operationState\":\"success\""),
-        line2 + " must contain operationState");
-    Assert.that(
-        line2.contains("\"outcome\":\"success\""), line2 + " must contain outcome");
-
+        line2.contains("\"operationState\":\"success\""), line2 + " must contain operationState");
+    Assert.that(line2.contains("\"outcome\":\"success\""), line2 + " must contain outcome");
 
     verifyNoMoreInteractions(mockLogger);
+  }
+
+
+  @Test
+  public void change_default_layout_to_json() {
+    SimpleOperationContext.changeDefaultLayout(Layout.Json);
+    operation("simple_op", mockLogger).started().wasSuccessful();
+
+    verify(mockLogger, times(2)).isInfoEnabled();
+
+    ArgumentCaptor<String> lines = ArgumentCaptor.forClass(String.class);
+    verify(mockLogger, times(2)).info(lines.capture());
+
+    final String line1 = lines.getAllValues().get(0);
+    Assert.that(line1.contains("\"logLevel\":\"INFO\""), line1 + " must contain logLevel");
+  }
+
+  @Test
+  public void change_layout_to_key_value_for_operation() {
+    SimpleOperationContext.changeDefaultLayout(Layout.Json);
+    operation("simple_op", mockLogger).asKeyValuePairs().started().wasSuccessful();
+
+    verify(mockLogger, times(2)).isInfoEnabled();
+    verify(mockLogger).info("operation=\"simple_op\" operationState=\"started\"");
+  }
+
+  @Test
+  public void validate_valid_key() {
+    SimpleOperationContext.changeDefaultKeyRegex(KeyRegex.CamelCase);
+    operation("simple_op", mockLogger).started().wasSuccessful();
+  }
+
+  @Test
+  public void validate_valid_parameters() {
+    SimpleOperationContext.changeDefaultKeyRegex(KeyRegex.CamelCase);
+    operation("simple_op", mockLogger)
+        .started()
+        .with("activeSubscription", "S-12345")
+        .wasSuccessful();
+  }
+
+  @Test(expected = AssertionError.class)
+  public void validate_invalid_key() {
+    SimpleOperationContext.changeDefaultKeyRegex(KeyRegex.CamelCase);
+    operation("simple_op", mockLogger).started().with("InvalidKey", "1").wasSuccessful();
+  }
+
+  @Test
+  public void disable_default_key_validation() {
+    SimpleOperationContext.disableDefaultKeyValidation();
+    operation("simple_op", mockLogger).started().with("InvalidKey", "1").wasSuccessful();
+  }
+
+  @Test
+  public void disable_key_validation_for_operation() {
+    operation("simple_op", mockLogger).disableKeyValidation()
+        .started().with("InvalidKey", "1").wasSuccessful();
+  }
+
+  @Test(expected = AssertionError.class)
+  public void validate_per_operation() {
+    disableDefaultKeyValidation();
+
+    operation("simple_op", mockLogger).validate(KeyRegex.CamelCase)
+        .started().with("InvalidKey", "1").wasSuccessful();
+  }
+
+  @Test(expected = AssertionError.class)
+  public void validate_per_operation_with_custom_pattern() {
+    disableDefaultKeyValidation();
+
+    operation("simple_op", mockLogger)
+        .validate("\"([A-Z]+[a-z]+\\\\w+)+\"")
+        .started()
+        .with("InvalidKey", "1")
+        .wasSuccessful();
   }
 }
