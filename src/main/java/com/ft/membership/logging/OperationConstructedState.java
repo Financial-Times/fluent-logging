@@ -1,16 +1,9 @@
 package com.ft.membership.logging;
 
 public class OperationConstructedState implements OperationState {
-
-  private static final String type = "operation";
   private static final OperationConstructedState INSTANCE = new OperationConstructedState();
 
-  protected OperationConstructedState() { }
-
-  @Override
-  public String getType() {
-    return type;
-  }
+  protected OperationConstructedState() {}
 
   @Override
   public void start(final OperationContext context) {
@@ -19,7 +12,7 @@ public class OperationConstructedState implements OperationState {
 
   @Override
   public void succeed(final OperationContext context) {
-    context.setState(new SuccessState(context));
+    context.setState(SuccessState.of(context));
   }
 
   @Override

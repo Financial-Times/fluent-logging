@@ -1,15 +1,9 @@
 package com.ft.membership.logging;
 
 public class ActionConstructedState implements OperationState {
-  private static final String type = "action";
   private static final ActionConstructedState INSTANCE = new ActionConstructedState();
 
   private ActionConstructedState() {}
-
-  @Override
-  public String getType() {
-    return type;
-  }
 
   @Override
   public void start(final OperationContext context) {

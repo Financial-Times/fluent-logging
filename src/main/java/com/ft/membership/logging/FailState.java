@@ -2,21 +2,10 @@ package com.ft.membership.logging;
 
 import org.slf4j.event.Level;
 
-import java.util.Map;
-
 public class FailState implements OperationState {
-  private final String type;
+  private static final FailState INSTANCE = new FailState();
 
-  public FailState(OperationContext context) {
-    type = context.getType();
-    context.with(Key.OperationState, "fail");
-    context.log(Outcome.Failure, Level.ERROR);
-  }
-
-  @Override
-  public String getType() {
-    return type;
-  }
+  private FailState() { }
 
   @Override
   public void start(final OperationContext context) {}
@@ -28,6 +17,9 @@ public class FailState implements OperationState {
   public void fail(final OperationContext context) {}
 
   public static OperationState of(final OperationContext context) {
-    return new FailState(context);
+    context.with(Key.OperationState, "fail");
+    context.log(Outcome.Failure, Level.ERROR);
+
+    return INSTANCE;
   }
 }

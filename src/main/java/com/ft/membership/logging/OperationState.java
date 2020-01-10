@@ -2,7 +2,6 @@ package com.ft.membership.logging;
 
 /**
  * {@code OperationState} is the basic interface for operation states
- * All operation states need some "type" representing it.
  * {@code OperationState} defines the following state methods (a.k.a operation state transitions):
  * - start
  * - succeed
@@ -12,7 +11,6 @@ package com.ft.membership.logging;
  * {@code OperationState} is intended to be used within {@code OperationContext}.
  */
 public interface OperationState {
-  String getType();
 
   void start(OperationContext operationContext);
 

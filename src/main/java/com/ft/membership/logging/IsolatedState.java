@@ -2,20 +2,10 @@ package com.ft.membership.logging;
 
 
 public class IsolatedState implements OperationState {
-  private String type;
+  private static IsolatedState INSTANCE = new IsolatedState();
 
   // Use the static factory method
   private IsolatedState() {}
-  private IsolatedState(SimpleOperationContext context, String type) {
-    this.type = type;
-  }
-
-
-
-  @Override
-  public String getType() {
-    return type;
-  }
 
   @Override
   public void start(OperationContext context) {}
@@ -27,6 +17,6 @@ public class IsolatedState implements OperationState {
   public void fail(OperationContext context) {}
 
   public static IsolatedState of(SimpleOperationContext context, String type) {
-    return new IsolatedState(context, type);
+    return INSTANCE;
   }
 }

@@ -7,7 +7,8 @@ public enum Key {
   ErrorMessage("errorMessage"),
   DebugMessage("debugMessage"),
   OperationState("operationState"),
-  Operation("operation");
+  Operation("operation"),
+  Action("action");
 
   private final String key;
 

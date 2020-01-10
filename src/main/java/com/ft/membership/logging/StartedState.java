@@ -3,20 +3,12 @@ package com.ft.membership.logging;
 import org.slf4j.event.Level;
 
 import java.util.Map;
+import sun.jvm.hotspot.oops.Instance;
 
 public class StartedState implements OperationState {
-  private String type;
+  private static final StartedState INSTANCE = new StartedState();
 
-  protected StartedState(OperationContext context) {
-    type = context.getType();
-    context.with(Key.OperationState, "started");
-    context.log(Level.INFO);
-  }
-
-  @Override
-  public String getType() {
-    return type;
-  }
+  private StartedState() { }
 
   @Override
   public void start(OperationContext context) {
@@ -34,6 +26,9 @@ public class StartedState implements OperationState {
   }
 
   static StartedState of(final OperationContext context) {
-    return new StartedState(context);
+    context.with(Key.OperationState, "started");
+    context.log(Level.INFO);
+
+    return INSTANCE;
   }
 }

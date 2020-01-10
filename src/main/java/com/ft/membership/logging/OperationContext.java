@@ -121,9 +121,9 @@ public abstract class OperationContext implements AutoCloseable {
     return actorOrLogger;
   }
 
-  String getType() {
-    return this.state.getType();
-  }
+//  String getType() {
+//    return this.state.getType();
+//  }
 
   void setState(OperationState operationState) {
     this.state = operationState;

@@ -5,16 +5,9 @@ import org.slf4j.event.Level;
 import java.util.Map;
 
 public class SuccessState implements OperationState {
-  private final String type;
+  private static final SuccessState INSTANCE = new SuccessState();
 
-  protected SuccessState(OperationContext context) {
-    type = context.getType();
-    context.with(Key.OperationState, "success");
-    context.log(Outcome.Success, Level.INFO);
-  }
-
-  @Override
-  public String getType() {return type;}
+  private SuccessState() {}
 
   @Override
   public void start(final OperationContext context) {}
@@ -26,6 +19,9 @@ public class SuccessState implements OperationState {
   public void fail(final OperationContext context) {}
 
   static SuccessState of(final OperationContext context) {
-    return new SuccessState(context);
+    context.with(Key.OperationState, "success");
+    context.log(Outcome.Success, Level.INFO);
+
+    return INSTANCE;
   }
 }

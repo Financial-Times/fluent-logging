@@ -53,7 +53,7 @@ public class LogFormatter {
 
   void logStart(final OperationContext operation) {
     final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
-    addOperationType(operation, msgParams);
+    //addOperationType(operation, msgParams);
     addOperationParameters(operation, msgParams);
     if (logger.isInfoEnabled()) {
       logger.info(buildMsgString(msgParams));
@@ -66,12 +66,13 @@ public class LogFormatter {
 
   void log(final OperationContext operation, final Outcome outcome, final Level logLevel) {
     final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
-    addOperationType(operation, msgParams);
+    //addOperationType(operation, msgParams);
+
+    addOperationParameters(operation, msgParams);
 
     if (outcome != null) {
       addOutcome(outcome.getKey(), msgParams);
     }
-    addOperationParameters(operation, msgParams);
 
     switch (logLevel) {
       case DEBUG:
@@ -257,7 +258,7 @@ public class LogFormatter {
   }
 
   private void addOperationType(final OperationContext operation, final Collection<NameAndValue> msgParams) {
-    msgParams.add(nameAndValue(operation.getType(), operation.getName()));
+  //  msgParams.add(nameAndValue(operation.getType(), operation.getName()));
   }
 
   private void addOperationParameters(final Operation operation,
