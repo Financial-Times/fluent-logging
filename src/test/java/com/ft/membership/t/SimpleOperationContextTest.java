@@ -3,6 +3,7 @@ package com.ft.membership.t;
 import static com.ft.membership.logging.OperationContext.disableDefaultKeyValidation;
 import static com.ft.membership.logging.SimpleOperationContext.action;
 import static com.ft.membership.logging.SimpleOperationContext.operation;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -261,16 +262,16 @@ public class SimpleOperationContextTest {
     verify(mockLogger, times(2)).info(lines.capture());
 
     final String line1 = lines.getAllValues().get(0);
-    assert line1.contains("\"logLevel\":\"INFO\"") : line1 + " must contain logLevel";
-    assert line1.contains("\"operation\":\"compound_success\"") : line1 + " must contain operation";
-    assert line1.contains("\"operationState\":\"started\"") : line1 + " must contain operationState";
-    assert !line1.contains("\"outcome\":\"success\"") : line1 + " must not contain outcome";
+    assertTrue(line1 + " must contain logLevel", line1.contains("\"logLevel\":\"INFO\""));
+    assertTrue(line1 + " must contain operation", line1.contains("\"operation\":\"compound_success\""));
+    assertTrue(line1 + " must contain operationState", line1.contains("\"operationState\":\"started\""));
+    assertTrue(line1 + " must not contain outcome", !line1.contains("\"outcome\":\"success\""));
 
     final String line2 = lines.getAllValues().get(1);
-    assert line2.contains("\"logLevel\":\"INFO\"") : line2 + " must contain logLevel";
-    assert line2.contains("\"operation\":\"compound_success\"") : line2 + " must contain operation";
-    assert line2.contains("\"operationState\":\"success\"") : line2 + " must contain operationState";
-    assert line2.contains("\"outcome\":\"success\"") : line2 + " must contain outcome";
+    assertTrue(line2 + " must contain logLevel", line2.contains("\"logLevel\":\"INFO\""));
+    assertTrue(line2 + " must contain operation", line2.contains("\"operation\":\"compound_success\""));
+    assertTrue(line2 + " must contain operationState", line2.contains("\"operationState\":\"success\""));
+    assertTrue(line2 + " must contain outcome", line2.contains("\"outcome\":\"success\""));
 
     verifyNoMoreInteractions(mockLogger);
   }
@@ -287,7 +288,7 @@ public class SimpleOperationContextTest {
     verify(mockLogger, times(2)).info(lines.capture());
 
     final String line1 = lines.getAllValues().get(0);
-    assert line1.contains("\"logLevel\":\"INFO\"") : line1 + " must contain logLevel";
+    assertTrue(line1 + " must contain logLevel", line1.contains("\"logLevel\":\"INFO\""));
   }
 
   @Test
