@@ -26,7 +26,7 @@ public abstract class OperationContext implements AutoCloseable {
   /**
    * Gives ability to set default layout of the output. One option is key=value, while the other
    * is {"key":"value"}
-   * The layout is valid for all following operations.
+   * The layout will be used for all following operations.
    * It could be overwritten for specific operation.
   */
   private static Layout defaultLayout = Layout.KeyValuePair;
@@ -221,7 +221,11 @@ public abstract class OperationContext implements AutoCloseable {
   }
 
   void addParam(final Map<String, Object> keyValues) {
-    parameters.putAll(keyValues);
+    if (Objects.isNull(keyRegexPattern)) {
+      parameters.putAll(keyValues);
+    } else {
+      keyValues.forEach(this::addParam);
+    }
   }
 
 }

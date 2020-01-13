@@ -11,9 +11,10 @@ libraries and applications. `fluent-logging` is build on top of [slf4j](http://w
 You can use `SimpleOperationContext` to create `operations` and `actions`. `action` is a step in the `operation`.
 Operations and actions follow the same basic lifecycle:
 1. Call static factory method
-1. Configure any options valid for the whole operation/action (e.g. at(Level), as(Json), etc.)
-1. Attach known parameters using `with`
+1. Optionally configure any options valid for the whole operation/action (e.g. at(Level), as(Json), etc.)
+1. Optionally attach known parameters using `with()`
 1. Optionally call started if you want to have separate log for start
+1. Optionally attach more parameters using `with()`
 1. Either call wasSuccessful or wasFailure
 
 - At any point after calling the static factory method you are free to call the logDebug method in order to log some specific message that will not attach any parameters to the original operation/action
@@ -61,13 +62,15 @@ SimpleOperationContext.changeDefaultLayout(Layout.Json);
 final OperationContext operationJson = operation("name", this).with("argument", UUID.randomUUID()).started();
 ```
 ### Enable key validation
-Splunk is case sensitive for field names. You can enable camelCase validation for keys:
+Field names in Splunk are case sensitive. You can enable camelCase validation for keys.
+Be careful when using this feature since after enabling validation anytime you with("InvalidKey") a AssertionException will be thrown!
+The goal of the exception is to take logs seriously and spot problems as soon as possible.
 ```
 // Will throw an AssertionError because InvalidKey is not camel case
 operation("simple_op", mockLogger).validate(KeyRegex.CamelCase).with("InvalidKey", "1").with("validKey", "2").started();
 ```
 
-You can enable it globally:
+You can enable key validation globally:
 ```
 SimpleOperationContext.changeDefaultKeyRegex(KeyRegex.CamelCase);
 operation("simple_op", mockLogger).with("InvalidKey", "1").with("validKey", "2").started();
@@ -81,11 +84,12 @@ operation("compound_success", mockLogger).at(Level.WARN).started().wasSuccessful
 ### More Info
 Refer [SimpleOperationContextTest](src/test/java/com/ft/membership/t/SimpleOperationContextTest.java) to see all the capabilities of the provided implementation
 
-### Escaping
-The second argument passed to the factory methods `operation` & `action` is used to derive the logger name,
+### Actor
+The second argument passed to the factory methods `operation` & `action` (called `actorOrLogger`) is used to derive the logger name,
 and is usually the object which is the orchestrator of an operation.
 Alternatively, a specific `slf4j` logger instance can be passed.
 
+### Escaping
 Arguments (for example attached `with()`) are escaped to allow Splunk to index them, e.g. double quotes are escaped.
 
 ## Advanced usage
@@ -93,12 +97,11 @@ You can create class similar to `SimpleOperationContext` that inherits from `Ope
 That way you can define your own transitions or advanced features.
 
 ## Logging Conventions
-In FT Membership team we have a confluence page defining the key/field names.
-The recommendation is that all users of the library in specific domain use the same key names.
-You can create a documentation or share set of enums across projects.
+In FT Membership team we have a Confluence page defining the key/field names.
+The recommendation is that all users of the library in specific domain should use the same key/field names.
+You can create a document with conventions like us or share set of enums across projects.
 
 ## Fluent-Logging outputs in only KV-pairs
-
 To remove plain text from logs and to have only KV pairs as output use following configuration of
 the repository using Fluent-Logging library:
 

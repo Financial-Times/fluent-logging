@@ -100,19 +100,6 @@ public class LogFormatter {
     }
   }
 
-  void logInfo(final Operation operation, final Outcome outcome) {
-    operation.terminated();
-
-    if (logger.isInfoEnabled()) {
-      final Collection<NameAndValue> msgParams = new ArrayList<NameAndValue>();
-      addOperation(operation, msgParams);
-      addOutcome(outcome, msgParams);
-      addOperationParameters(operation, msgParams);
-
-      logger.info(buildMsgString(msgParams));
-    }
-  }
-
   void logInfo(final Operation operation, Yield yield, boolean terminateOperation) {
     if (terminateOperation) {
       operation.terminated();

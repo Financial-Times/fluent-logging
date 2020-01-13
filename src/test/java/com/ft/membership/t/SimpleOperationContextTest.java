@@ -110,6 +110,15 @@ public class SimpleOperationContextTest {
             "operation=\"getUserSubscriptions\" userId=\"1234\" activeSubscription=\"S-12345\" operationState=\"success\" outcome=\"success\"");
   }
 
+  @Test(expected = AssertionError.class)
+  public void key_validation_for_multiple_operation_params() {
+    HashMap params = new HashMap();
+    params.put("validParam", "1");
+    params.put("InvalidParam", "2");
+
+    operation("getUserSubscriptions", mockLogger).validate(KeyRegex.CamelCase).with(params);
+  }
+
   @Test
   public void multiple_operation_states() {
     OperationContext operation =

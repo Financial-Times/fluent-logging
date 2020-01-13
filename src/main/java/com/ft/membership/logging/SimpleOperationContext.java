@@ -1,5 +1,6 @@
 package com.ft.membership.logging;
 
+import static com.ft.membership.logging.Preconditions.checkIsEmpty;
 import static com.ft.membership.logging.Preconditions.checkNotNull;
 
 import java.util.Map;
@@ -10,13 +11,13 @@ import org.slf4j.event.Level;
 public final class SimpleOperationContext extends OperationContext {
   private String type;
 
-  SimpleOperationContext(
+  private SimpleOperationContext(
       final String name,
       final String type,
       final Object actorOrLogger,
       final Map<String, Object> parameters
   ) {
-    checkNotNull(name, "provide a name for the name");
+    checkIsEmpty(name, "provide a valid name");
 
     this.name = name;
     this.type = type;
@@ -25,7 +26,6 @@ public final class SimpleOperationContext extends OperationContext {
   }
 
   public static SimpleOperationContext operation(final String name, final Object actorOrLogger) {
-    checkNotNull(name, "require name");
     final SimpleOperationContext context =
         new SimpleOperationContext(name, "operation", actorOrLogger, null);
     context.changeState(OperationConstructedState.from(context));
@@ -34,7 +34,6 @@ public final class SimpleOperationContext extends OperationContext {
   }
 
   public static SimpleOperationContext action(final String name, final Object actorOrLogger) {
-    checkNotNull(name, "require name");
     final SimpleOperationContext context =
         new SimpleOperationContext(name, "action", actorOrLogger, null);
     context.changeState(ActionConstructedState.from(context));
