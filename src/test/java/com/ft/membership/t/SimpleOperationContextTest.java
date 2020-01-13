@@ -23,7 +23,6 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
-import sun.jvm.hotspot.utilities.Assert;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SimpleOperationContextTest {
@@ -262,20 +261,16 @@ public class SimpleOperationContextTest {
     verify(mockLogger, times(2)).info(lines.capture());
 
     final String line1 = lines.getAllValues().get(0);
-    Assert.that(line1.contains("\"logLevel\":\"INFO\""), line1 + " must contain logLevel");
-    Assert.that(
-        line1.contains("\"operation\":\"compound_success\""), line1 + " must contain operation");
-    Assert.that(
-        line1.contains("\"operationState\":\"started\""), line1 + " must contain operationState");
-    Assert.that(!line1.contains("\"outcome\":\"success\""), line1 + " must not contain outcome");
+    assert line1.contains("\"logLevel\":\"INFO\"") : line1 + " must contain logLevel";
+    assert line1.contains("\"operation\":\"compound_success\"") : line1 + " must contain operation";
+    assert line1.contains("\"operationState\":\"started\"") : line1 + " must contain operationState";
+    assert !line1.contains("\"outcome\":\"success\"") : line1 + " must not contain outcome";
 
     final String line2 = lines.getAllValues().get(1);
-    Assert.that(line2.contains("\"logLevel\":\"INFO\""), line2 + " must contain logLevel");
-    Assert.that(
-        line2.contains("\"operation\":\"compound_success\""), line2 + " must contain operation");
-    Assert.that(
-        line2.contains("\"operationState\":\"success\""), line2 + " must contain operationState");
-    Assert.that(line2.contains("\"outcome\":\"success\""), line2 + " must contain outcome");
+    assert line2.contains("\"logLevel\":\"INFO\"") : line2 + " must contain logLevel";
+    assert line2.contains("\"operation\":\"compound_success\"") : line2 + " must contain operation";
+    assert line2.contains("\"operationState\":\"success\"") : line2 + " must contain operationState";
+    assert line2.contains("\"outcome\":\"success\"") : line2 + " must contain outcome";
 
     verifyNoMoreInteractions(mockLogger);
   }
@@ -292,7 +287,7 @@ public class SimpleOperationContextTest {
     verify(mockLogger, times(2)).info(lines.capture());
 
     final String line1 = lines.getAllValues().get(0);
-    Assert.that(line1.contains("\"logLevel\":\"INFO\""), line1 + " must contain logLevel");
+    assert line1.contains("\"logLevel\":\"INFO\"") : line1 + " must contain logLevel";
   }
 
   @Test
