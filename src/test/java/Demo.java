@@ -1,6 +1,8 @@
-import static com.ft.membership.logging.Operation.operation;
 
-import com.ft.membership.logging.Operation;
+import static com.ft.membership.logging.SimpleOperationContext.action;
+import static com.ft.membership.logging.SimpleOperationContext.operation;
+
+import com.ft.membership.logging.OperationContext;
 import java.util.UUID;
 
 public class Demo {
@@ -11,35 +13,33 @@ public class Demo {
 
   @SuppressWarnings("divzero")
   protected void run() {
-    // report starting conditions
-    final Operation operation =
-        operation("operation").with("argument", UUID.randomUUID()).started(this);
-    // result operation does not print out the starting conditions, only success/failures
-
-    final Operation resultOperation =
-        operation("resultOperation").with("argument", UUID.randomUUID()).initiate(this);
-
-    // operation with JSON layout
-    final Operation operationJson =
-        Operation.operation("Operation that outputs in JSON format")
-            .jsonLayout()
-            .with("argument", UUID.randomUUID())
-            .started(this);
+    final OperationContext operation =
+        operation("operation", this).with("id", UUID.randomUUID()).started();
 
     try {
-      // do some things
-      int x = 1 / 0;
-      // report success
-      operation.wasSuccessful().yielding("result", "{\"text\": \"hello world\"}").log();
-      resultOperation.wasSuccessful().yielding("result", "{\"text\": \"hello world\"}").log();
-
-      operationJson.wasSuccessful().yielding("result", "{\"text\": \"hello world\"}").log();
-
+      final Result result = getResult();
+      operation.wasSuccessful(result);
     } catch (Exception e) {
-      // report failure
-      operation.wasFailure().throwingException(e).log();
-      resultOperation.wasFailure().throwingException(e).log();
-      operationJson.wasFailure().throwingException(e).log();
+      operation.wasFailure(e);
+    }
+  }
+
+  private Result getResult() {
+    final OperationContext action = action("getResult", this).started();
+
+    final Result result = new Result();
+
+    action.with("answer", result.answer).wasSuccessful(result);
+    return result;
+  }
+
+  private class Result {
+
+    public int answer = 42;
+
+    @Override
+    public String toString() {
+      return "for tee two";
     }
   }
 }

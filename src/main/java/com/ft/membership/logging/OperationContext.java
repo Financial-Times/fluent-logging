@@ -104,10 +104,13 @@ public abstract class OperationContext implements AutoCloseable {
     return this;
   }
 
+/*
+  // Not supported yet - we currently set some camelCase fields like operationState
   public OperationContext validate(final String regex) {
     keyRegexPattern = Pattern.compile(regex);
     return this;
   }
+*/
 
   public OperationContext at(final Level level) {
     this.level = level;
@@ -180,8 +183,11 @@ public abstract class OperationContext implements AutoCloseable {
 
   @Override
   public void close() {
-    if (!(state instanceof FailState || state instanceof SuccessState)) {
-      wasFailure("Programmer error: operation auto-closed before wasSuccessful() or wasFailure() called.");
+    if (!(state instanceof FailState
+        || state instanceof SuccessState
+        || state instanceof IsolatedState)) {
+      wasFailure(
+          "Programmer error: operation auto-closed before wasSuccessful() or wasFailure() called.");
     }
 
     clear();

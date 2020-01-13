@@ -1,3 +1,8 @@
+#4.0.0
+* Deprecate Operation, Failure, Yield, IntermediateYield
+* Introduce OperationContext and OperationState as abstract types for building fluent logs
+* Provide sample implementation with SimpleOperationContext fit for the FT use case with operations and actions
+
 #3.1.1
 
 * Allow intermediate logs for a given Operation
