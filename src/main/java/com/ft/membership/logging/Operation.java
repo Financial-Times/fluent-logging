@@ -6,9 +6,10 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * DEPRECATED since v4: Use an OperationContext implementation (e.g. SimpleOperationContext's operation/action)
+ * DEPRECATED since v4: Use an OperationContext implementation (e.g. SimpleOperationContext's
+ * operation/action)
  *
- * An Operation is a logging context with starting parameters, which either succeeds or fails,
+ * <p>An Operation is a logging context with starting parameters, which either succeeds or fails,
  * supporting additional detail as to what happened. It logs in a <tt>key="value"</tt> format
  * suitable for parsing by a log aggregator such as Splunk, escaping quotes with back-slashes.
  *

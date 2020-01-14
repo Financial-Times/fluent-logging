@@ -1,10 +1,9 @@
 package com.ft.membership.logging;
 
-
 public class StartedState implements OperationState {
   private static final StartedState INSTANCE = new StartedState();
 
-  private StartedState() { }
+  private StartedState() {}
 
   @Override
   public void succeed(OperationContext context) {

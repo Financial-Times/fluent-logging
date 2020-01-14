@@ -5,7 +5,7 @@ import org.slf4j.event.Level;
 public class FailState implements OperationState {
   private static final FailState INSTANCE = new FailState();
 
-  private FailState() { }
+  private FailState() {}
 
   public static OperationState from(final OperationContext context) {
     context.with(Key.OperationState, "fail");

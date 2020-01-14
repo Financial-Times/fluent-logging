@@ -216,9 +216,7 @@ public class LogFormatter {
   }
 
   private String buildMsgString(final Collection<NameAndValue> msgParams) {
-    return msgParams.stream().map(
-        param -> param.toString()
-    ).collect(Collectors.joining(" "));
+    return msgParams.stream().map(param -> param.toString()).collect(Collectors.joining(" "));
   }
 
   private String buildMsgJson(final Collection<NameAndValue> msgParams, String logLevel) {
@@ -243,13 +241,13 @@ public class LogFormatter {
     msgParams.add(nameAndValue("operation", operation.getName()));
   }
 
-  private void addOperationParameters(final Operation operation,
-      final Collection<NameAndValue> msgParams) {
+  private void addOperationParameters(
+      final Operation operation, final Collection<NameAndValue> msgParams) {
     addParametersAsNamedValues(msgParams, operation.getParameters());
   }
 
-  private void addOperationParameters(final OperationContext operation,
-      final Collection<NameAndValue> msgParams) {
+  private void addOperationParameters(
+      final OperationContext operation, final Collection<NameAndValue> msgParams) {
     addParametersAsNamedValues(msgParams, operation.getParameters());
   }
 

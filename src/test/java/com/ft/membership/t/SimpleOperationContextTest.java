@@ -38,7 +38,6 @@ public class SimpleOperationContextTest {
     Mockito.when(mockLogger.isDebugEnabled()).thenReturn(true);
     Mockito.when(mockLogger.isWarnEnabled()).thenReturn(true);
 
-
     SimpleOperationContext.changeDefaultLevel(Level.INFO);
     SimpleOperationContext.changeDefaultLayout(Layout.KeyValuePair);
     SimpleOperationContext.changeDefaultKeyRegex(KeyRegex.CamelCase);
@@ -273,19 +272,22 @@ public class SimpleOperationContextTest {
 
     final String line1 = lines.getAllValues().get(0);
     assertTrue(line1 + " must contain logLevel", line1.contains("\"logLevel\":\"INFO\""));
-    assertTrue(line1 + " must contain operation", line1.contains("\"operation\":\"compound_success\""));
-    assertTrue(line1 + " must contain operationState", line1.contains("\"operationState\":\"started\""));
+    assertTrue(
+        line1 + " must contain operation", line1.contains("\"operation\":\"compound_success\""));
+    assertTrue(
+        line1 + " must contain operationState", line1.contains("\"operationState\":\"started\""));
     assertTrue(line1 + " must not contain outcome", !line1.contains("\"outcome\":\"success\""));
 
     final String line2 = lines.getAllValues().get(1);
     assertTrue(line2 + " must contain logLevel", line2.contains("\"logLevel\":\"INFO\""));
-    assertTrue(line2 + " must contain operation", line2.contains("\"operation\":\"compound_success\""));
-    assertTrue(line2 + " must contain operationState", line2.contains("\"operationState\":\"success\""));
+    assertTrue(
+        line2 + " must contain operation", line2.contains("\"operation\":\"compound_success\""));
+    assertTrue(
+        line2 + " must contain operationState", line2.contains("\"operationState\":\"success\""));
     assertTrue(line2 + " must contain outcome", line2.contains("\"outcome\":\"success\""));
 
     verifyNoMoreInteractions(mockLogger);
   }
-
 
   @Test
   public void change_default_layout_to_json() {
@@ -338,16 +340,22 @@ public class SimpleOperationContextTest {
 
   @Test
   public void disable_key_validation_for_operation() {
-    operation("simple_op", mockLogger).disableKeyValidation()
-        .started().with("InvalidKey", "1").wasSuccessful();
+    operation("simple_op", mockLogger)
+        .disableKeyValidation()
+        .started()
+        .with("InvalidKey", "1")
+        .wasSuccessful();
   }
 
   @Test(expected = AssertionError.class)
   public void validate_per_operation() {
     disableDefaultKeyValidation();
 
-    operation("simple_op", mockLogger).validate(KeyRegex.CamelCase)
-        .started().with("InvalidKey", "1").wasSuccessful();
+    operation("simple_op", mockLogger)
+        .validate(KeyRegex.CamelCase)
+        .started()
+        .with("InvalidKey", "1")
+        .wasSuccessful();
   }
 
   // Not supported yet

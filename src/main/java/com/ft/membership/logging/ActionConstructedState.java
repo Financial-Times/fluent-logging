@@ -21,7 +21,7 @@ public class ActionConstructedState implements OperationState {
   }
 
   public static ActionConstructedState from(final SimpleOperationContext context) {
-   return INSTANCE;
+    return INSTANCE;
   }
 
   @Override

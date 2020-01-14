@@ -15,8 +15,7 @@ public final class SimpleOperationContext extends OperationContext {
       final String name,
       final String type,
       final Object actorOrLogger,
-      final Map<String, Object> parameters
-  ) {
+      final Map<String, Object> parameters) {
     checkIsEmpty(name, "provide a valid name");
 
     this.name = name;
@@ -84,12 +83,8 @@ public final class SimpleOperationContext extends OperationContext {
   }
 
   private SimpleOperationContext getIsolatedOperationContext() {
-    SimpleOperationContext debugSimpleOperationContext = new SimpleOperationContext(
-        name,
-        type,
-        actorOrLogger,
-        parameters.getParameters()
-    );
+    SimpleOperationContext debugSimpleOperationContext =
+        new SimpleOperationContext(name, type, actorOrLogger, parameters.getParameters());
 
     IsolatedState isolatedState = IsolatedState.from(this);
     debugSimpleOperationContext.changeState(isolatedState);

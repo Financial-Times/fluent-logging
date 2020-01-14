@@ -1,4 +1,3 @@
-
 import static com.ft.membership.logging.SimpleOperationContext.action;
 import static com.ft.membership.logging.SimpleOperationContext.operation;
 
