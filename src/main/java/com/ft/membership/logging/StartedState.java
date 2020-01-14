@@ -1,6 +1,5 @@
 package com.ft.membership.logging;
 
-import org.slf4j.event.Level;
 
 public class StartedState implements OperationState {
   private static final StartedState INSTANCE = new StartedState();
@@ -17,10 +16,15 @@ public class StartedState implements OperationState {
     changeState(context, FailState.from(context));
   }
 
-  static StartedState from(final OperationContext context) {
+  public static StartedState from(final OperationContext context) {
     context.with(Key.OperationState, "started");
     context.log();
 
     return INSTANCE;
+  }
+
+  @Override
+  public String toString() {
+    return "startedState";
   }
 }

@@ -13,4 +13,9 @@ public class FailState implements OperationState {
 
     return INSTANCE;
   }
+
+  @Override
+  public String toString() {
+    return "failState";
+  }
 }

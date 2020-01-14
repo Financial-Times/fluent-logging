@@ -10,4 +10,9 @@ public class IsolatedState implements OperationState {
   public static IsolatedState from(SimpleOperationContext context) {
     return INSTANCE;
   }
+
+  @Override
+  public String toString() {
+    return "isolatedState";
+  }
 }

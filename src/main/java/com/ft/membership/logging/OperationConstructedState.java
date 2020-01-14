@@ -20,8 +20,13 @@ public class OperationConstructedState implements OperationState {
     changeState(context, FailState.from(context));
   }
 
-  static OperationConstructedState from(final SimpleOperationContext context) {
+  public static OperationConstructedState from(final SimpleOperationContext context) {
     context.addIdentity(context.getName());
     return INSTANCE;
+  }
+
+  @Override
+  public String toString() {
+    return "operationConstructedState";
   }
 }

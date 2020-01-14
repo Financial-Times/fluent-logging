@@ -3,6 +3,7 @@ package com.ft.membership.t;
 import static com.ft.membership.logging.OperationContext.disableDefaultKeyValidation;
 import static com.ft.membership.logging.SimpleOperationContext.action;
 import static com.ft.membership.logging.SimpleOperationContext.operation;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -423,5 +424,12 @@ public class SimpleOperationContextTest {
     verify(mockLogger)
         .warn("operation=\"compound_success\" operationState=\"success\" outcome=\"success\"");
     verifyNoMoreInteractions(mockLogger);
+  }
+
+  @Test
+  public void to_string() {
+    final String result = operation("compound_success", mockLogger).started().toString();
+
+    assertEquals("name=compound_success type=operation state=startedState", result);
   }
 }

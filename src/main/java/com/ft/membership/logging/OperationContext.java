@@ -39,14 +39,14 @@ public abstract class OperationContext implements AutoCloseable {
    */
   private static Pattern defaultKeyRegexPattern;
 
-  protected Layout layout = defaultLayout;
-  protected Pattern keyRegexPattern = defaultKeyRegexPattern;
+  private Layout layout = defaultLayout;
+  private Pattern keyRegexPattern = defaultKeyRegexPattern;
 
-  protected String name;
-  protected Parameters parameters;
-  protected Object actorOrLogger;
-  protected OperationState state;
-  protected Level level;
+  String name;
+  Parameters parameters;
+  Object actorOrLogger;
+  OperationState state;
+  Level level;
 
   /**
    * Method used to clear the context.
@@ -196,6 +196,11 @@ public abstract class OperationContext implements AutoCloseable {
     state = null;
   }
 
+  @Override
+  public String toString() {
+    return getName() + " " + getState();
+  }
+
   String getName() {
     return name;
   }
@@ -207,6 +212,8 @@ public abstract class OperationContext implements AutoCloseable {
   Object getActorOrLogger() {
     return actorOrLogger;
   }
+
+  OperationState getState() { return state; }
 
   void changeState(OperationState operationState) {
     state = operationState;

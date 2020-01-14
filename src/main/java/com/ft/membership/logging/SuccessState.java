@@ -5,10 +5,15 @@ public class SuccessState implements OperationState {
 
   private SuccessState() {}
 
-  static SuccessState from(final OperationContext context) {
+  public static SuccessState from(final OperationContext context) {
     context.with(Key.OperationState, "success");
     context.log(Outcome.Success);
 
     return INSTANCE;
+  }
+
+  @Override
+  public String toString() {
+    return "successState";
   }
 }

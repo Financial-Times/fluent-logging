@@ -64,6 +64,10 @@ public final class SimpleOperationContext extends OperationContext {
     MDC.put("operation", name);
   }
 
+  String getType() {
+    return type;
+  }
+
   @Override
   protected void clear() {
     if (state != null && "operation".equals(type)) {
@@ -72,6 +76,11 @@ public final class SimpleOperationContext extends OperationContext {
 
     // We need to clear the reference
     state = null;
+  }
+
+  @Override
+  public String toString() {
+    return "name=" + getName() + " type=" + getType() + " state=" + getState();
   }
 
   private SimpleOperationContext getIsolatedOperationContext() {

@@ -23,4 +23,9 @@ public class ActionConstructedState implements OperationState {
   public static ActionConstructedState from(final SimpleOperationContext context) {
    return INSTANCE;
   }
+
+  @Override
+  public String toString() {
+    return "actionConstructedState";
+  }
 }
