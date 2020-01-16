@@ -8,11 +8,16 @@ import org.slf4j.MDC;
 import org.slf4j.event.Level;
 
 public final class SimpleOperationContext extends OperationContext {
-  private String type;
+  private enum Type {
+    Action,
+    Operation
+  }
+
+  private Type type;
 
   private SimpleOperationContext(
       final String name,
-      final String type,
+      final Type type,
       final Object actorOrLogger,
       final Map<String, Object> parameters) {
     checkIsEmpty(name, "provide a valid name");
@@ -25,7 +30,7 @@ public final class SimpleOperationContext extends OperationContext {
 
   public static SimpleOperationContext operation(final String name, final Object actorOrLogger) {
     final SimpleOperationContext context =
-        new SimpleOperationContext(name, "operation", actorOrLogger, null);
+        new SimpleOperationContext(name, Type.Operation, actorOrLogger, null);
     context.changeState(OperationConstructedState.from(context));
     context.with(Key.Operation, name);
     return context;
@@ -33,7 +38,7 @@ public final class SimpleOperationContext extends OperationContext {
 
   public static SimpleOperationContext action(final String name, final Object actorOrLogger) {
     final SimpleOperationContext context =
-        new SimpleOperationContext(name, "action", actorOrLogger, null);
+        new SimpleOperationContext(name, Type.Action, actorOrLogger, null);
     context.changeState(ActionConstructedState.from(context));
 
     final String operation = MDC.get("operation");
@@ -60,13 +65,13 @@ public final class SimpleOperationContext extends OperationContext {
     MDC.put("operation", name);
   }
 
-  String getType() {
+  private Type getType() {
     return type;
   }
 
   @Override
   protected void clear() {
-    if (state != null && "operation".equals(type)) {
+    if (state != null && Type.Operation.equals(type)) {
       MDC.remove("operation");
     }
   }

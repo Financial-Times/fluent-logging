@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import com.ft.membership.logging.Key;
 import com.ft.membership.logging.KeyRegex;
 import com.ft.membership.logging.Layout;
 import com.ft.membership.logging.OperationContext;
@@ -109,6 +110,15 @@ public class SimpleOperationContextTest {
     verify(mockLogger)
         .info(
             "operation=\"getUserSubscriptions\" userId=\"1234\" activeSubscription=\"S-12345\" operationState=\"success\" outcome=\"success\"");
+  }
+
+  @Test
+  public void conflict_param_name() {
+    operation("getUserSubscriptions", mockLogger).with(Key.OperationState, "overwrite").started();
+    verify(mockLogger, times(1)).isInfoEnabled();
+    verify(mockLogger)
+        .info(
+            "operation=\"getUserSubscriptions\" operationState=\"started\"");
   }
 
   @Test(expected = AssertionError.class)
