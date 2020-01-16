@@ -190,9 +190,6 @@ public abstract class OperationContext implements AutoCloseable {
     }
 
     clear();
-
-    // We need to clear the reference
-    state = null;
   }
 
   @Override

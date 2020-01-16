@@ -1,7 +1,6 @@
 package com.ft.membership.logging;
 
 import static com.ft.membership.logging.Preconditions.checkIsEmpty;
-import static com.ft.membership.logging.Preconditions.checkNotNull;
 
 import java.util.Map;
 import java.util.Objects;
@@ -48,8 +47,6 @@ public final class SimpleOperationContext extends OperationContext {
   }
 
   public void logDebug(final String debugMessage, final Map<String, Object> keyValues) {
-    checkNotNull(state, "operation is already closed");
-
     SimpleOperationContext debugSimpleOperationContext = getIsolatedOperationContext();
 
     debugSimpleOperationContext.with(Key.DebugMessage, debugMessage);
@@ -72,9 +69,6 @@ public final class SimpleOperationContext extends OperationContext {
     if (state != null && "operation".equals(type)) {
       MDC.remove("operation");
     }
-
-    // We need to clear the reference
-    state = null;
   }
 
   @Override

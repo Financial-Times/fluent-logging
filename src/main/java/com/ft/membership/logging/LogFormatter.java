@@ -2,7 +2,6 @@ package com.ft.membership.logging;
 
 import static com.ft.membership.logging.LogFormatter.NameAndValue.nameAndValue;
 import static com.ft.membership.logging.Preconditions.checkNotNull;
-import static org.slf4j.event.Level.DEBUG;
 import static org.slf4j.event.Level.TRACE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

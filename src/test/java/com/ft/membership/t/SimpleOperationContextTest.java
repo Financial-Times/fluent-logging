@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import com.ft.membership.logging.KeyRegex;
 import com.ft.membership.logging.Layout;
 import com.ft.membership.logging.OperationContext;
+import com.ft.membership.logging.Preconditions.EmptyValueException;
 import com.ft.membership.logging.SimpleOperationContext;
 import java.util.Collections;
 import java.util.HashMap;
@@ -165,12 +166,16 @@ public class SimpleOperationContextTest {
     verifyNoMoreInteractions(mockLogger);
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void debug_when_finished_operation() {
     OperationContext operation = operation("getUserSubscriptions", mockLogger).started();
-    operation.wasSuccessful();
+    operation.with("userId", "1234").wasSuccessful();
     operation.logDebug(
         "The user has a lot of subscriptions", Collections.singletonMap("subscriptionCount", 999));
+    verify(mockLogger)
+        .debug(
+            "operation=\"getUserSubscriptions\" operationState=\"success\" userId=\"1234\""
+                + " debugMessage=\"The user has a lot of subscriptions\" subscriptionCount=999");
   }
 
   @Test
@@ -439,5 +444,17 @@ public class SimpleOperationContextTest {
     final String result = operation("compound_success", mockLogger).started().toString();
 
     assertEquals("name=compound_success type=operation state=startedState", result);
+  }
+
+  @Test(expected = EmptyValueException.class)
+  public void empty_operation_name() {
+    operation("", mockLogger).started();
+    verifyNoMoreInteractions(mockLogger);
+  }
+
+  @Test(expected = EmptyValueException.class)
+  public void null_operation_name() {
+    operation(null, mockLogger).started();
+    verifyNoMoreInteractions(mockLogger);
   }
 }
