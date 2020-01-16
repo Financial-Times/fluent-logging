@@ -12,7 +12,7 @@ import org.slf4j.event.Level;
  * {@code FluentLogger} is the intended type to be interacted with when creating Operations
  * Either use the factory methods of {@code SimpleFluentLogger} or create your own
  * implementation of this class that fits your needs. You can define new operation states by
- * implementing {@code OperationState}. {@code FluentLogger} objects are intended to be used
+ * implementing {@code LoggerState}. {@code FluentLogger} objects are intended to be used
  * with try-with-resources. When operation is closed it is assumed that they need to be either in
  * {@code SuccessState} or {@code FailState}, if that is not the case with your use case overwrite
  * the close method
@@ -41,7 +41,7 @@ public abstract class FluentLogger implements AutoCloseable {
   String name;
   Parameters parameters;
   Object actorOrLogger;
-  OperationState state;
+  LoggerState state;
   Level level;
 
   /**
@@ -209,12 +209,12 @@ public abstract class FluentLogger implements AutoCloseable {
     return actorOrLogger;
   }
 
-  OperationState getState() {
+  LoggerState getState() {
     return state;
   }
 
-  void changeState(OperationState operationState) {
-    state = operationState;
+  void changeState(LoggerState loggerState) {
+    state = loggerState;
   };
 
   void addParam(final String key, final Object value) {

@@ -1,6 +1,6 @@
 package com.ft.membership.logging;
 
-public class IsolatedState implements OperationState {
+public class IsolatedState implements LoggerState {
   private static IsolatedState INSTANCE = new IsolatedState();
 
   private IsolatedState() {}

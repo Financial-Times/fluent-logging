@@ -1,6 +1,6 @@
 package com.ft.membership.logging;
 
-public class SuccessState implements OperationState {
+public class SuccessState implements LoggerState {
   private static final SuccessState INSTANCE = new SuccessState();
 
   private SuccessState() {}

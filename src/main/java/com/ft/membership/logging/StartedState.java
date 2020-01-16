@@ -1,6 +1,6 @@
 package com.ft.membership.logging;
 
-public class StartedState implements OperationState {
+public class StartedState implements LoggerState {
   private static final StartedState INSTANCE = new StartedState();
 
   private StartedState() {}

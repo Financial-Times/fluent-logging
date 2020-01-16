@@ -8,7 +8,7 @@ fluent logging is java logging library having [splunk](https://www.splunk.com/) 
 libraries and applications. `fluent-logging` is build on top of [slf4j](http://www.slf4j.org/) and the provided implementation utilises [MDC](http://www.slf4j.org/manual.html#mdc), so you would benefit if you use log4j or logback as logging backend.
 
 ## Basic Usage
-You can use `SimpleOperationContext` to create `operations` and `actions`. `action` is a step in the `operation`.
+You can use `SimpleFluentLogger` to create `operations` and `actions`. In this implementation during an `operation` you can create multiple `actions`. Each action is linked to the overarching `operation`.
 Operations and actions follow the same basic lifecycle:
 1. Call static factory method
 1. Optionally configure any options valid for the whole operation/action (e.g. at(Level), as(Json), etc.)
@@ -31,7 +31,7 @@ public class Demo {
     }
 
     protected void run() {
-        final OperationContext operation = operation("name", this).with("argument", UUID.randomUUID()).started();            
+        final FluentLogger operation = operation("name", this).with("argument", UUID.randomUUID()).started();            
         try {
             final Result result = ...;
             operation.wasSuccessful(result);
@@ -44,22 +44,22 @@ public class Demo {
 
 ## Example output
 ```
-15:08:07.420 [main] INFO Demo - operation="operation" id="0781772d-0678-4b98-88a6-1042299fc69b" operationState="started"
-15:08:07.423 [main] INFO Demo - operation="operation" action="getResult" operationState="started"
-15:08:07.424 [main] INFO Demo - operation="operation" action="getResult" operationState="success" answer=42 result="for tee two" outcome="success"
-15:08:07.425 [main] INFO Demo - operation="operation" id="0781772d-0678-4b98-88a6-1042299fc69b" operationState="success" result="for tee two" outcome="success"
+15:08:07.420 [main] INFO Demo - operation="operation" id="0781772d-0678-4b98-88a6-1042299fc69b" loggerState="started"
+15:08:07.423 [main] INFO Demo - operation="operation" action="getResult" loggerState="started"
+15:08:07.424 [main] INFO Demo - operation="operation" action="getResult" loggerState="success" answer=42 result="for tee two" outcome="success"
+15:08:07.425 [main] INFO Demo - operation="operation" id="0781772d-0678-4b98-88a6-1042299fc69b" loggerState="success" result="for tee two" outcome="success"
 ```
 
 ## Additional usages
 ### JSON layout
 By default the library uses key=value layout. You can use the JSON layout as well:
 ```
-final OperationContext operationJson = operation("name", this).asJson().with("argument", UUID.randomUUID()).started();
+final FluentLogger operationJson = operation("name", this).asJson().with("argument", UUID.randomUUID()).started();
 ```
 ### Change default layout
 ```
-SimpleOperationContext.changeDefaultLayout(Layout.Json);
-final OperationContext operationJson = operation("name", this).with("argument", UUID.randomUUID()).started();
+SimpleFluentLogger.changeDefaultLayout(Layout.Json);
+final FluentLogger operationJson = operation("name", this).with("argument", UUID.randomUUID()).started();
 ```
 ### Enable key validation
 Field names in Splunk are case sensitive. You can enable camelCase validation for keys.
@@ -72,7 +72,7 @@ operation("simple_op", mockLogger).validate(KeyRegex.CamelCase).with("InvalidKey
 
 You can enable key validation globally:
 ```
-SimpleOperationContext.changeDefaultKeyRegex(KeyRegex.CamelCase);
+SimpleFluentLogger.changeDefaultKeyRegex(KeyRegex.CamelCase);
 operation("simple_op", mockLogger).with("InvalidKey", "1").with("validKey", "2").started();
 ```
 ### Log at specific level
@@ -82,7 +82,7 @@ operation("compound_success", mockLogger).at(Level.WARN).started().wasSuccessful
 ```
 
 ### More Info
-Refer [SimpleOperationContextTest](src/test/java/com/ft/membership/t/SimpleOperationContextTest.java) to see all the capabilities of the provided implementation
+Refer [SimpleFluentLoggerTest](src/test/java/com/ft/membership/t/SimpleFluentLoggerTest.java) to see all the capabilities of the provided implementation
 
 ### Actor
 The second argument passed to the factory methods `operation` & `action` (called `actorOrLogger`) is used to derive the logger name,
@@ -93,7 +93,7 @@ Alternatively, a specific `slf4j` logger instance can be passed.
 Arguments (for example attached `with()`) are escaped to allow Splunk to index them, e.g. double quotes are escaped.
 
 ## Advanced usage
-You can create class similar to `SimpleOperationContext` that inherits from `OperationContext` and introduce different states by extending the `OperationState` interface.
+You can create class similar to `SimpleFluentLogger` that inherits from `FluentLogger` and introduce different states by extending the `LoggerState` interface.
 That way you can define your own transitions or advanced features.
 
 ## Logging Conventions
