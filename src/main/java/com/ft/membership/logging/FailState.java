@@ -7,8 +7,8 @@ public class FailState implements OperationState {
 
   private FailState() {}
 
-  public static OperationState from(final OperationContext context) {
-    context.with(Key.OperationState, "fail");
+  public static OperationState from(final FluentLogger context) {
+    context.with(Key.LoggerState, "fail");
     context.log(Outcome.Failure, Level.ERROR);
 
     return INSTANCE;

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * DEPRECATED since v4: Use an OperationContext implementation (e.g. SimpleOperationContext's
+ * DEPRECATED since v4: Use an FluentLogger implementation (e.g. SimpleFluentLogger's
  * operation/action)
  *
  * <p>An Operation is a logging context with starting parameters, which either succeeds or fails,

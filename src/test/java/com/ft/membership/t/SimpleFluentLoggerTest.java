@@ -1,20 +1,20 @@
 package com.ft.membership.t;
 
-import static com.ft.membership.logging.OperationContext.disableDefaultKeyValidation;
-import static com.ft.membership.logging.SimpleOperationContext.action;
-import static com.ft.membership.logging.SimpleOperationContext.operation;
+import static com.ft.membership.logging.FluentLogger.disableDefaultKeyValidation;
+import static com.ft.membership.logging.SimpleFluentLogger.action;
+import static com.ft.membership.logging.SimpleFluentLogger.operation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import com.ft.membership.logging.FluentLogger;
 import com.ft.membership.logging.Key;
 import com.ft.membership.logging.KeyRegex;
 import com.ft.membership.logging.Layout;
-import com.ft.membership.logging.OperationContext;
 import com.ft.membership.logging.Preconditions.EmptyValueException;
-import com.ft.membership.logging.SimpleOperationContext;
+import com.ft.membership.logging.SimpleFluentLogger;
 import java.util.Collections;
 import java.util.HashMap;
 import org.junit.Before;
@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.event.Level;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SimpleOperationContextTest {
+public class SimpleFluentLoggerTest {
 
   @Mock Logger mockLogger;
 
@@ -40,9 +40,9 @@ public class SimpleOperationContextTest {
     Mockito.when(mockLogger.isDebugEnabled()).thenReturn(true);
     Mockito.when(mockLogger.isWarnEnabled()).thenReturn(true);
 
-    SimpleOperationContext.changeDefaultLevel(Level.INFO);
-    SimpleOperationContext.changeDefaultLayout(Layout.KeyValuePair);
-    SimpleOperationContext.changeDefaultKeyRegex(KeyRegex.CamelCase);
+    SimpleFluentLogger.changeDefaultLevel(Level.INFO);
+    SimpleFluentLogger.changeDefaultLayout(Layout.KeyValuePair);
+    SimpleFluentLogger.changeDefaultKeyRegex(KeyRegex.CamelCase);
   }
 
   @Test
@@ -51,9 +51,9 @@ public class SimpleOperationContextTest {
 
     verify(mockLogger, times(2)).isInfoEnabled();
 
-    verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger).info("operation=\"compound_success\" loggerState=\"started\"");
     verify(mockLogger)
-        .info("operation=\"compound_success\" operationState=\"success\" outcome=\"success\"");
+        .info("operation=\"compound_success\" loggerState=\"success\" outcome=\"success\"");
     verifyNoMoreInteractions(mockLogger);
   }
 
@@ -63,10 +63,10 @@ public class SimpleOperationContextTest {
 
     verify(mockLogger, times(2)).isInfoEnabled();
 
-    verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger).info("operation=\"compound_success\" loggerState=\"started\"");
     verify(mockLogger)
         .info(
-            "operation=\"compound_success\" operationState=\"success\" result=\"42\" outcome=\"success\"");
+            "operation=\"compound_success\" loggerState=\"success\" result=\"42\" outcome=\"success\"");
     verifyNoMoreInteractions(mockLogger);
   }
 
@@ -77,9 +77,9 @@ public class SimpleOperationContextTest {
     verify(mockLogger, times(1)).isInfoEnabled();
     verify(mockLogger, times(1)).isErrorEnabled();
 
-    verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger).info("operation=\"compound_success\" loggerState=\"started\"");
     verify(mockLogger)
-        .error("operation=\"compound_success\" operationState=\"fail\" outcome=\"failure\"");
+        .error("operation=\"compound_success\" loggerState=\"fail\" outcome=\"failure\"");
     verifyNoMoreInteractions(mockLogger);
   }
 
@@ -92,7 +92,7 @@ public class SimpleOperationContextTest {
     verify(mockLogger)
         .error(
             "operation=\"compound_success\" errorMessage=\"exception_failure_operation\""
-                + " operationState=\"fail\" outcome=\"failure\"");
+                + " loggerState=\"fail\" outcome=\"failure\"");
     verifyNoMoreInteractions(mockLogger);
   }
 
@@ -106,19 +106,19 @@ public class SimpleOperationContextTest {
     verify(mockLogger, times(2)).isInfoEnabled();
     verify(mockLogger)
         .info(
-            "operation=\"getUserSubscriptions\" userId=\"1234\" activeSubscription=\"S-12345\" operationState=\"started\"");
+            "operation=\"getUserSubscriptions\" userId=\"1234\" activeSubscription=\"S-12345\" loggerState=\"started\"");
     verify(mockLogger)
         .info(
-            "operation=\"getUserSubscriptions\" userId=\"1234\" activeSubscription=\"S-12345\" operationState=\"success\" outcome=\"success\"");
+            "operation=\"getUserSubscriptions\" userId=\"1234\" activeSubscription=\"S-12345\" loggerState=\"success\" outcome=\"success\"");
   }
 
   @Test
   public void conflict_param_name() {
-    operation("getUserSubscriptions", mockLogger).with(Key.OperationState, "overwrite").started();
+    operation("getUserSubscriptions", mockLogger).with(Key.LoggerState, "overwrite").started();
     verify(mockLogger, times(1)).isInfoEnabled();
     verify(mockLogger)
         .info(
-            "operation=\"getUserSubscriptions\" operationState=\"started\"");
+            "operation=\"getUserSubscriptions\" loggerState=\"started\"");
   }
 
   @Test(expected = AssertionError.class)
@@ -132,7 +132,7 @@ public class SimpleOperationContextTest {
 
   @Test
   public void multiple_operation_states() {
-    OperationContext operation =
+    FluentLogger operation =
         operation("getUserSubscriptions", mockLogger).with("userId", "1234").started();
 
     operation.logDebug("The user has a lot of subscriptions");
@@ -142,19 +142,19 @@ public class SimpleOperationContextTest {
     verify(mockLogger, times(2)).isInfoEnabled();
     verify(mockLogger, times(1)).isDebugEnabled();
     verify(mockLogger)
-        .info("operation=\"getUserSubscriptions\" userId=\"1234\" operationState=\"started\"");
+        .info("operation=\"getUserSubscriptions\" userId=\"1234\" loggerState=\"started\"");
     verify(mockLogger)
         .debug(
-            "operation=\"getUserSubscriptions\" userId=\"1234\" operationState=\"started\" debugMessage=\"The user has a lot of subscriptions\"");
+            "operation=\"getUserSubscriptions\" userId=\"1234\" loggerState=\"started\" debugMessage=\"The user has a lot of subscriptions\"");
     verify(mockLogger)
         .info(
-            "operation=\"getUserSubscriptions\" userId=\"1234\" operationState=\"success\" activeSubscription=\"S-12345\" outcome=\"success\"");
+            "operation=\"getUserSubscriptions\" userId=\"1234\" loggerState=\"success\" activeSubscription=\"S-12345\" outcome=\"success\"");
     verifyNoMoreInteractions(mockLogger);
   }
 
   @Test
   public void debug_capabilities() {
-    OperationContext operation = operation("getUserSubscriptions", mockLogger);
+    FluentLogger operation = operation("getUserSubscriptions", mockLogger);
     operation.with("userId", "1234").started();
     operation.logDebug(
         "The user has a lot of subscriptions", Collections.singletonMap("subscriptionCount", 999));
@@ -165,26 +165,26 @@ public class SimpleOperationContextTest {
     verify(mockLogger, times(2)).isInfoEnabled();
     verify(mockLogger, times(1)).isDebugEnabled();
     verify(mockLogger)
-        .info("operation=\"getUserSubscriptions\" userId=\"1234\" operationState=\"started\"");
+        .info("operation=\"getUserSubscriptions\" userId=\"1234\" loggerState=\"started\"");
     verify(mockLogger)
         .debug(
-            "operation=\"getUserSubscriptions\" userId=\"1234\" operationState=\"started\""
+            "operation=\"getUserSubscriptions\" userId=\"1234\" loggerState=\"started\""
                 + " debugMessage=\"The user has a lot of subscriptions\" subscriptionCount=999");
     verify(mockLogger)
         .info(
-            "operation=\"getUserSubscriptions\" userId=\"1234\" operationState=\"success\" activeSubscription=\"S-12345\" outcome=\"success\"");
+            "operation=\"getUserSubscriptions\" userId=\"1234\" loggerState=\"success\" activeSubscription=\"S-12345\" outcome=\"success\"");
     verifyNoMoreInteractions(mockLogger);
   }
 
   @Test
   public void debug_when_finished_operation() {
-    OperationContext operation = operation("getUserSubscriptions", mockLogger).started();
+    FluentLogger operation = operation("getUserSubscriptions", mockLogger).started();
     operation.with("userId", "1234").wasSuccessful();
     operation.logDebug(
         "The user has a lot of subscriptions", Collections.singletonMap("subscriptionCount", 999));
     verify(mockLogger)
         .debug(
-            "operation=\"getUserSubscriptions\" operationState=\"success\" userId=\"1234\""
+            "operation=\"getUserSubscriptions\" loggerState=\"success\" userId=\"1234\""
                 + " debugMessage=\"The user has a lot of subscriptions\" subscriptionCount=999");
   }
 
@@ -193,28 +193,28 @@ public class SimpleOperationContextTest {
     action("compound_action", mockLogger).started().wasSuccessful();
 
     verify(mockLogger, times(2)).isInfoEnabled();
-    verify(mockLogger).info("action=\"compound_action\" operationState=\"started\"");
+    verify(mockLogger).info("action=\"compound_action\" loggerState=\"started\"");
     verify(mockLogger)
-        .info("action=\"compound_action\" operationState=\"success\" outcome=\"success\"");
+        .info("action=\"compound_action\" loggerState=\"success\" outcome=\"success\"");
     verifyNoMoreInteractions(mockLogger);
   }
 
   @Test
   public void create_action_with_operation() {
-    OperationContext operation = operation("compound_operation", mockLogger).started();
+    FluentLogger operation = operation("compound_operation", mockLogger).started();
     doAction();
     operation.wasSuccessful();
 
     verify(mockLogger, times(4)).isInfoEnabled();
-    verify(mockLogger).info("operation=\"compound_operation\" operationState=\"started\"");
+    verify(mockLogger).info("operation=\"compound_operation\" loggerState=\"started\"");
     verify(mockLogger)
         .info(
-            "operation=\"compound_operation\" action=\"compound_action\" operationState=\"started\"");
+            "operation=\"compound_operation\" action=\"compound_action\" loggerState=\"started\"");
     verify(mockLogger)
         .info(
-            "operation=\"compound_operation\" action=\"compound_action\" operationState=\"success\" outcome=\"success\"");
+            "operation=\"compound_operation\" action=\"compound_action\" loggerState=\"success\" outcome=\"success\"");
     verify(mockLogger)
-        .info("operation=\"compound_operation\" operationState=\"success\" outcome=\"success\"");
+        .info("operation=\"compound_operation\" loggerState=\"success\" outcome=\"success\"");
 
     verifyNoMoreInteractions(mockLogger);
   }
@@ -225,42 +225,42 @@ public class SimpleOperationContextTest {
 
   @Test
   public void finish_not_started_operation() {
-    OperationContext operation = operation("compound_operation", mockLogger);
+    FluentLogger operation = operation("compound_operation", mockLogger);
     doAction();
     operation.wasSuccessful();
 
     verify(mockLogger, times(3)).isInfoEnabled();
     verify(mockLogger)
         .info(
-            "operation=\"compound_operation\" action=\"compound_action\" operationState=\"started\"");
+            "operation=\"compound_operation\" action=\"compound_action\" loggerState=\"started\"");
     verify(mockLogger)
         .info(
-            "operation=\"compound_operation\" action=\"compound_action\" operationState=\"success\" outcome=\"success\"");
+            "operation=\"compound_operation\" action=\"compound_action\" loggerState=\"success\" outcome=\"success\"");
     verify(mockLogger)
-        .info("operation=\"compound_operation\" operationState=\"success\" outcome=\"success\"");
+        .info("operation=\"compound_operation\" loggerState=\"success\" outcome=\"success\"");
 
     verifyNoMoreInteractions(mockLogger);
   }
 
   @Test
   public void not_finished_operation() {
-    try (OperationContext operation = operation("compound_operation", mockLogger).started()) {
+    try (FluentLogger operation = operation("compound_operation", mockLogger).started()) {
       doAction();
     }
 
     verify(mockLogger, times(3)).isInfoEnabled();
     verify(mockLogger, times(1)).isErrorEnabled();
 
-    verify(mockLogger).info("operation=\"compound_operation\" operationState=\"started\"");
+    verify(mockLogger).info("operation=\"compound_operation\" loggerState=\"started\"");
     verify(mockLogger)
         .info(
-            "operation=\"compound_operation\" action=\"compound_action\" operationState=\"started\"");
+            "operation=\"compound_operation\" action=\"compound_action\" loggerState=\"started\"");
     verify(mockLogger)
         .info(
-            "operation=\"compound_operation\" action=\"compound_action\" operationState=\"success\" outcome=\"success\"");
+            "operation=\"compound_operation\" action=\"compound_action\" loggerState=\"success\" outcome=\"success\"");
     verify(mockLogger)
         .error(
-            "operation=\"compound_operation\" operationState=\"fail\" "
+            "operation=\"compound_operation\" loggerState=\"fail\" "
                 + "result=\"Programmer error: operation auto-closed before wasSuccessful() or wasFailure() called.\" "
                 + "outcome=\"failure\"");
 
@@ -269,11 +269,11 @@ public class SimpleOperationContextTest {
 
   @Test
   public void as_layout() {
-    SimpleOperationContext.changeDefaultLayout(Layout.Json);
+    SimpleFluentLogger.changeDefaultLayout(Layout.Json);
     operation("simple_op", mockLogger).as(Layout.KeyValuePair).started().wasSuccessful();
 
     verify(mockLogger, times(2)).isInfoEnabled();
-    verify(mockLogger).info("operation=\"simple_op\" operationState=\"started\"");
+    verify(mockLogger).info("operation=\"simple_op\" loggerState=\"started\"");
   }
 
   @Test
@@ -290,7 +290,7 @@ public class SimpleOperationContextTest {
     assertTrue(
         line1 + " must contain operation", line1.contains("\"operation\":\"compound_success\""));
     assertTrue(
-        line1 + " must contain operationState", line1.contains("\"operationState\":\"started\""));
+        line1 + " must contain loggerState", line1.contains("\"loggerState\":\"started\""));
     assertTrue(line1 + " must not contain outcome", !line1.contains("\"outcome\":\"success\""));
 
     final String line2 = lines.getAllValues().get(1);
@@ -298,7 +298,7 @@ public class SimpleOperationContextTest {
     assertTrue(
         line2 + " must contain operation", line2.contains("\"operation\":\"compound_success\""));
     assertTrue(
-        line2 + " must contain operationState", line2.contains("\"operationState\":\"success\""));
+        line2 + " must contain loggerState", line2.contains("\"loggerState\":\"success\""));
     assertTrue(line2 + " must contain outcome", line2.contains("\"outcome\":\"success\""));
 
     verifyNoMoreInteractions(mockLogger);
@@ -306,7 +306,7 @@ public class SimpleOperationContextTest {
 
   @Test
   public void change_default_layout_to_json() {
-    SimpleOperationContext.changeDefaultLayout(Layout.Json);
+    SimpleFluentLogger.changeDefaultLayout(Layout.Json);
     operation("simple_op", mockLogger).started().wasSuccessful();
 
     verify(mockLogger, times(2)).isInfoEnabled();
@@ -320,11 +320,11 @@ public class SimpleOperationContextTest {
 
   @Test
   public void change_layout_to_key_value_for_operation() {
-    SimpleOperationContext.changeDefaultLayout(Layout.Json);
+    SimpleFluentLogger.changeDefaultLayout(Layout.Json);
     operation("simple_op", mockLogger).asKeyValuePairs().started().wasSuccessful();
 
     verify(mockLogger, times(2)).isInfoEnabled();
-    verify(mockLogger).info("operation=\"simple_op\" operationState=\"started\"");
+    verify(mockLogger).info("operation=\"simple_op\" loggerState=\"started\"");
   }
 
   @Test
@@ -334,7 +334,7 @@ public class SimpleOperationContextTest {
 
   @Test
   public void validate_valid_parameters() {
-    SimpleOperationContext.changeDefaultKeyRegex(KeyRegex.CamelCase);
+    SimpleFluentLogger.changeDefaultKeyRegex(KeyRegex.CamelCase);
     operation("simple_op", mockLogger)
         .started()
         .with("activeSubscription", "S-12345")
@@ -343,13 +343,13 @@ public class SimpleOperationContextTest {
 
   @Test(expected = AssertionError.class)
   public void validate_invalid_key() {
-    SimpleOperationContext.changeDefaultKeyRegex(KeyRegex.CamelCase);
+    SimpleFluentLogger.changeDefaultKeyRegex(KeyRegex.CamelCase);
     operation("simple_op", mockLogger).started().with("InvalidKey", "1").wasSuccessful();
   }
 
   @Test
   public void disable_default_key_validation() {
-    SimpleOperationContext.disableDefaultKeyValidation();
+    SimpleFluentLogger.disableDefaultKeyValidation();
     operation("simple_op", mockLogger).started().with("InvalidKey", "1").wasSuccessful();
   }
 
@@ -392,9 +392,9 @@ public class SimpleOperationContextTest {
 
     verify(mockLogger, times(2)).isWarnEnabled();
 
-    verify(mockLogger).warn("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger).warn("operation=\"compound_success\" loggerState=\"started\"");
     verify(mockLogger)
-        .warn("operation=\"compound_success\" operationState=\"success\" outcome=\"success\"");
+        .warn("operation=\"compound_success\" loggerState=\"success\" outcome=\"success\"");
     verifyNoMoreInteractions(mockLogger);
   }
 
@@ -405,9 +405,9 @@ public class SimpleOperationContextTest {
     verify(mockLogger, times(1)).isInfoEnabled();
     verify(mockLogger, times(1)).isWarnEnabled();
 
-    verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger).info("operation=\"compound_success\" loggerState=\"started\"");
     verify(mockLogger)
-        .warn("operation=\"compound_success\" operationState=\"success\" outcome=\"success\"");
+        .warn("operation=\"compound_success\" loggerState=\"success\" outcome=\"success\"");
     verifyNoMoreInteractions(mockLogger);
   }
 
@@ -417,9 +417,9 @@ public class SimpleOperationContextTest {
 
     verify(mockLogger, times(2)).isInfoEnabled();
 
-    verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger).info("operation=\"compound_success\" loggerState=\"started\"");
     verify(mockLogger)
-        .info("operation=\"compound_success\" operationState=\"success\" outcome=\"success\"");
+        .info("operation=\"compound_success\" loggerState=\"success\" outcome=\"success\"");
     verifyNoMoreInteractions(mockLogger);
   }
 
@@ -432,20 +432,20 @@ public class SimpleOperationContextTest {
     verify(mockLogger, times(1)).isInfoEnabled();
     verify(mockLogger, times(1)).isTraceEnabled();
 
-    verify(mockLogger).info("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger).info("operation=\"compound_success\" loggerState=\"started\"");
     verifyNoMoreInteractions(mockLogger);
   }
 
   @Test
   public void change_default_level() {
-    SimpleOperationContext.changeDefaultLevel(Level.WARN);
+    SimpleFluentLogger.changeDefaultLevel(Level.WARN);
     operation("compound_success", mockLogger).started().wasSuccessful();
 
     verify(mockLogger, times(2)).isWarnEnabled();
 
-    verify(mockLogger).warn("operation=\"compound_success\" operationState=\"started\"");
+    verify(mockLogger).warn("operation=\"compound_success\" loggerState=\"started\"");
     verify(mockLogger)
-        .warn("operation=\"compound_success\" operationState=\"success\" outcome=\"success\"");
+        .warn("operation=\"compound_success\" loggerState=\"success\" outcome=\"success\"");
     verifyNoMoreInteractions(mockLogger);
   }
 

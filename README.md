@@ -19,9 +19,9 @@ Operations and actions follow the same basic lifecycle:
 
 - At any point after calling the static factory method you are free to call the logDebug method in order to log some specific message that will not attach any parameters to the original operation/action
 ```
-import static com.ft.membership.logging.SimpleOperationContext.operation;
+import static com.ft.membership.logging.SimpleFluentLogger.operation;
 
-import com.ft.membership.logging.OperationContext;
+import com.ft.membership.logging.FluentLogger;
 
 
 public class Demo {

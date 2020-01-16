@@ -7,15 +7,15 @@ import java.util.Objects;
 import org.slf4j.MDC;
 import org.slf4j.event.Level;
 
-public final class SimpleOperationContext extends OperationContext {
+public final class SimpleFluentLogger extends FluentLogger {
   private enum Type {
-    Action,
-    Operation
+    action,
+    operation
   }
 
   private Type type;
 
-  private SimpleOperationContext(
+  private SimpleFluentLogger(
       final String name,
       final Type type,
       final Object actorOrLogger,
@@ -28,17 +28,17 @@ public final class SimpleOperationContext extends OperationContext {
     this.parameters = Parameters.parameters(parameters);
   }
 
-  public static SimpleOperationContext operation(final String name, final Object actorOrLogger) {
-    final SimpleOperationContext context =
-        new SimpleOperationContext(name, Type.Operation, actorOrLogger, null);
+  public static SimpleFluentLogger operation(final String name, final Object actorOrLogger) {
+    final SimpleFluentLogger context =
+        new SimpleFluentLogger(name, Type.operation, actorOrLogger, null);
     context.changeState(OperationConstructedState.from(context));
     context.with(Key.Operation, name);
     return context;
   }
 
-  public static SimpleOperationContext action(final String name, final Object actorOrLogger) {
-    final SimpleOperationContext context =
-        new SimpleOperationContext(name, Type.Action, actorOrLogger, null);
+  public static SimpleFluentLogger action(final String name, final Object actorOrLogger) {
+    final SimpleFluentLogger context =
+        new SimpleFluentLogger(name, Type.action, actorOrLogger, null);
     context.changeState(ActionConstructedState.from(context));
 
     final String operation = MDC.get("operation");
@@ -52,7 +52,7 @@ public final class SimpleOperationContext extends OperationContext {
   }
 
   public void logDebug(final String debugMessage, final Map<String, Object> keyValues) {
-    SimpleOperationContext debugSimpleOperationContext = getIsolatedOperationContext();
+    SimpleFluentLogger debugSimpleOperationContext = getIsolatedOperationContext();
 
     debugSimpleOperationContext.with(Key.DebugMessage, debugMessage);
     debugSimpleOperationContext.with(keyValues);
@@ -71,7 +71,7 @@ public final class SimpleOperationContext extends OperationContext {
 
   @Override
   protected void clear() {
-    if (state != null && Type.Operation.equals(type)) {
+    if (state != null && Type.operation.equals(type)) {
       MDC.remove("operation");
     }
   }
@@ -81,9 +81,9 @@ public final class SimpleOperationContext extends OperationContext {
     return "name=" + getName() + " type=" + getType() + " state=" + getState();
   }
 
-  private SimpleOperationContext getIsolatedOperationContext() {
-    SimpleOperationContext debugSimpleOperationContext =
-        new SimpleOperationContext(name, type, actorOrLogger, parameters.getParameters());
+  private SimpleFluentLogger getIsolatedOperationContext() {
+    SimpleFluentLogger debugSimpleOperationContext =
+        new SimpleFluentLogger(name, type, actorOrLogger, parameters.getParameters());
 
     IsolatedState isolatedState = IsolatedState.from(this);
     debugSimpleOperationContext.changeState(isolatedState);

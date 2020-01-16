@@ -5,7 +5,7 @@ public class IsolatedState implements OperationState {
 
   private IsolatedState() {}
 
-  public static IsolatedState from(SimpleOperationContext context) {
+  public static IsolatedState from(SimpleFluentLogger context) {
     return INSTANCE;
   }
 

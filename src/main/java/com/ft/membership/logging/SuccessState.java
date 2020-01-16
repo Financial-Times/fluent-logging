@@ -5,8 +5,8 @@ public class SuccessState implements OperationState {
 
   private SuccessState() {}
 
-  public static SuccessState from(final OperationContext context) {
-    context.with(Key.OperationState, "success");
+  public static SuccessState from(final FluentLogger context) {
+    context.with(Key.LoggerState, "success");
     context.log(Outcome.Success);
 
     return INSTANCE;

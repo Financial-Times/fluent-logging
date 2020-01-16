@@ -6,21 +6,21 @@ public class OperationConstructedState implements OperationState {
   protected OperationConstructedState() {}
 
   @Override
-  public void start(final OperationContext context) {
+  public void start(final FluentLogger context) {
     changeState(context, StartedState.from(context));
   }
 
   @Override
-  public void succeed(final OperationContext context) {
+  public void succeed(final FluentLogger context) {
     changeState(context, SuccessState.from(context));
   }
 
   @Override
-  public void fail(final OperationContext context) {
+  public void fail(final FluentLogger context) {
     changeState(context, FailState.from(context));
   }
 
-  public static OperationConstructedState from(final SimpleOperationContext context) {
+  public static OperationConstructedState from(final SimpleFluentLogger context) {
     context.addIdentity(context.getName());
     return INSTANCE;
   }

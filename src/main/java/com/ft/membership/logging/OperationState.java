@@ -5,17 +5,17 @@ package com.ft.membership.logging;
  * the following state methods (a.k.a operation state transitions): - start - succeed - fail After
  * operation is started it is expected to be finished - either by succeeding or failing. Extend this
  * interface in case you need more operation transitions. {@code OperationState} is intended to be
- * used within {@code OperationContext}.
+ * used within {@code FluentLogger}.
  */
 public interface OperationState {
 
-  default void start(OperationContext operationContext) {}
+  default void start(FluentLogger fluentLogger) {}
 
-  default void succeed(OperationContext operationContext) {}
+  default void succeed(FluentLogger fluentLogger) {}
 
-  default void fail(OperationContext operationContext) {}
+  default void fail(FluentLogger fluentLogger) {}
 
-  default void changeState(OperationContext operationContext, OperationState operationState) {
-    operationContext.changeState(operationState);
+  default void changeState(FluentLogger fluentLogger, OperationState operationState) {
+    fluentLogger.changeState(operationState);
   }
 }

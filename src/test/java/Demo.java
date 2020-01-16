@@ -1,7 +1,7 @@
-import static com.ft.membership.logging.SimpleOperationContext.action;
-import static com.ft.membership.logging.SimpleOperationContext.operation;
+import static com.ft.membership.logging.SimpleFluentLogger.action;
+import static com.ft.membership.logging.SimpleFluentLogger.operation;
 
-import com.ft.membership.logging.OperationContext;
+import com.ft.membership.logging.FluentLogger;
 import java.util.UUID;
 
 public class Demo {
@@ -12,7 +12,7 @@ public class Demo {
 
   @SuppressWarnings("divzero")
   protected void run() {
-    final OperationContext operation =
+    final FluentLogger operation =
         operation("operation", this).with("id", UUID.randomUUID()).started();
 
     try {
@@ -24,7 +24,7 @@ public class Demo {
   }
 
   private Result getResult() {
-    final OperationContext action = action("getResult", this).started();
+    final FluentLogger action = action("getResult", this).started();
 
     final Result result = new Result();
 

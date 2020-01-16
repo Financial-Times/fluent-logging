@@ -9,15 +9,15 @@ import java.util.regex.Pattern;
 import org.slf4j.event.Level;
 
 /**
- * {@code OperationContext} is the intended type to be interacted with when creating Operations
- * Either use the factory methods of {@code SimpleOperationContext} or create your own
+ * {@code FluentLogger} is the intended type to be interacted with when creating Operations
+ * Either use the factory methods of {@code SimpleFluentLogger} or create your own
  * implementation of this class that fits your needs. You can define new operation states by
- * implementing {@code OperationState}. {@code OperationContext} objects are intended to be used
+ * implementing {@code OperationState}. {@code FluentLogger} objects are intended to be used
  * with try-with-resources. When operation is closed it is assumed that they need to be either in
  * {@code SuccessState} or {@code FailState}, if that is not the case with your use case overwrite
  * the close method
  */
-public abstract class OperationContext implements AutoCloseable {
+public abstract class FluentLogger implements AutoCloseable {
   /** The default log level that will be used for operations different then error */
   private static Level defaultLevel = Level.INFO;
 
@@ -78,59 +78,59 @@ public abstract class OperationContext implements AutoCloseable {
 
   public abstract void logDebug(final String debugMessage, final Map<String, Object> keyValues);
 
-  public OperationContext as(final Layout layout) {
+  public FluentLogger as(final Layout layout) {
     this.layout = layout;
     return this;
   }
 
-  public OperationContext asJson() {
+  public FluentLogger asJson() {
     this.layout = Layout.Json;
     return this;
   }
 
-  public OperationContext asKeyValuePairs() {
+  public FluentLogger asKeyValuePairs() {
     this.layout = Layout.KeyValuePair;
     return this;
   }
 
-  public OperationContext disableKeyValidation() {
+  public FluentLogger disableKeyValidation() {
     keyRegexPattern = null;
     return this;
   }
 
-  public OperationContext validate(final KeyRegex keyRegex) {
+  public FluentLogger validate(final KeyRegex keyRegex) {
     keyRegexPattern = Pattern.compile(keyRegex.getRegex());
     return this;
   }
 
   /*
     // Not supported yet - we currently set some camelCase fields like operationState
-    public OperationContext validate(final String regex) {
+    public FluentLogger validate(final String regex) {
       keyRegexPattern = Pattern.compile(regex);
       return this;
     }
   */
 
-  public OperationContext at(final Level level) {
+  public FluentLogger at(final Level level) {
     this.level = level;
     return this;
   }
 
-  public OperationContext with(final Key key, final Object value) {
+  public FluentLogger with(final Key key, final Object value) {
     return with(key.getKey(), value);
   }
 
-  public OperationContext with(final String key, final Object value) {
+  public FluentLogger with(final String key, final Object value) {
     addParam(key, value);
     return this;
   }
 
-  public OperationContext with(final Map<String, Object> keyValues) {
+  public FluentLogger with(final Map<String, Object> keyValues) {
     addParam(keyValues);
     return this;
   }
 
-  public OperationContext started() {
+  public FluentLogger started() {
     state.start(this);
     return this;
   }

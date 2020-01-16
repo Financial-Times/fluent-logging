@@ -45,7 +45,7 @@ public class LogFormatter {
   }
 
   void log(
-      final OperationContext operation,
+      final FluentLogger operation,
       final Outcome outcome,
       final Level logLevel,
       final Layout layout) {
@@ -246,7 +246,7 @@ public class LogFormatter {
   }
 
   private void addOperationParameters(
-      final OperationContext operation, final Collection<NameAndValue> msgParams) {
+      final FluentLogger operation, final Collection<NameAndValue> msgParams) {
     addParametersAsNamedValues(msgParams, operation.getParameters());
   }
 

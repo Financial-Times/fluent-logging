@@ -6,7 +6,7 @@ public enum Key {
   Result("result"),
   ErrorMessage("errorMessage"),
   DebugMessage("debugMessage"),
-  OperationState("operationState"),
+  LoggerState("loggerState"),
   Operation("operation"),
   Action("action");
 
