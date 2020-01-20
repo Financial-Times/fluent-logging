@@ -125,6 +125,12 @@ public abstract class FluentLogger implements AutoCloseable {
     return this;
   }
 
+  public FluentLogger with(final Object key, final Object value) {
+    Objects.requireNonNull(key, "FluentLogger.with(key, value) requires non-null key");
+    addParam(key.toString(), value);
+    return this;
+  }
+
   public FluentLogger with(final Map<String, Object> keyValues) {
     addParam(keyValues);
     return this;

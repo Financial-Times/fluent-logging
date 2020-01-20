@@ -80,7 +80,7 @@ public class OperationTest {
     mapOfParams.put("zeta", "z");
 
     operation("simple_success")
-        .with(Key.UserId, userId)
+        .with("userId", userId)
         .with("y", "that quick brown fox")
         .with(mapOfParams)
         .started(mockLogger)
@@ -110,7 +110,7 @@ public class OperationTest {
         .with("y", "that quick brown fox")
         .started(mockLogger)
         .wasSuccessful()
-        .yielding(Key.UserEmail, email)
+        .yielding("email", email)
         .log();
 
     verify(mockLogger).info(eq("operation=\"simple_success\" y=\"that quick brown fox\""));

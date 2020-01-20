@@ -1,8 +1,6 @@
 package com.ft.membership.logging;
 
 public enum Key {
-  UserId("userId"),
-  UserEmail("email"),
   Result("result"),
   ErrorMessage("errorMessage"),
   DebugMessage("debugMessage"),

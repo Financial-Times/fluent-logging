@@ -5,6 +5,7 @@ import static com.ft.membership.logging.SimpleFluentLogger.action;
 import static com.ft.membership.logging.SimpleFluentLogger.operation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -119,6 +120,41 @@ public class SimpleFluentLoggerTest {
     verify(mockLogger)
         .info(
             "operation=\"getUserSubscriptions\" loggerState=\"started\"");
+  }
+
+  enum TestType {
+    SubscriptionNumber("subscriptionNumber");
+    private String id;
+
+    TestType(String id) {
+      this.id = id;
+    }
+
+    @Override
+    public String toString() {
+      return id;
+    }
+  };
+
+  @Test
+  public void with_custom_type() {
+    operation("getUserSubscriptions", mockLogger).with(TestType.SubscriptionNumber, "a").started();
+    verify(mockLogger, times(1)).isInfoEnabled();
+    verify(mockLogger)
+        .info(
+            "operation=\"getUserSubscriptions\" subscriptionNumber=\"a\" loggerState=\"started\"");
+  }
+
+  @Test
+  public void with_null_key() {
+    TestType nil = null;
+    try {
+      operation("getUserSubscriptions", mockLogger).with(nil, "a").started();
+    } catch (NullPointerException e) {
+      assertEquals(e.getMessage(), "FluentLogger.with(key, value) requires non-null key");
+      return;
+    }
+    fail();
   }
 
   @Test(expected = AssertionError.class)
