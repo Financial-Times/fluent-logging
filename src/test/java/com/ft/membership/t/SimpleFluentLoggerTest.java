@@ -117,9 +117,7 @@ public class SimpleFluentLoggerTest {
   public void conflict_param_name() {
     operation("getUserSubscriptions", mockLogger).with(Key.LoggerState, "overwrite").started();
     verify(mockLogger, times(1)).isInfoEnabled();
-    verify(mockLogger)
-        .info(
-            "operation=\"getUserSubscriptions\" loggerState=\"started\"");
+    verify(mockLogger).info("operation=\"getUserSubscriptions\" loggerState=\"started\"");
   }
 
   enum TestType {
@@ -325,16 +323,14 @@ public class SimpleFluentLoggerTest {
     assertTrue(line1 + " must contain logLevel", line1.contains("\"logLevel\":\"INFO\""));
     assertTrue(
         line1 + " must contain operation", line1.contains("\"operation\":\"compound_success\""));
-    assertTrue(
-        line1 + " must contain loggerState", line1.contains("\"loggerState\":\"started\""));
+    assertTrue(line1 + " must contain loggerState", line1.contains("\"loggerState\":\"started\""));
     assertTrue(line1 + " must not contain outcome", !line1.contains("\"outcome\":\"success\""));
 
     final String line2 = lines.getAllValues().get(1);
     assertTrue(line2 + " must contain logLevel", line2.contains("\"logLevel\":\"INFO\""));
     assertTrue(
         line2 + " must contain operation", line2.contains("\"operation\":\"compound_success\""));
-    assertTrue(
-        line2 + " must contain loggerState", line2.contains("\"loggerState\":\"success\""));
+    assertTrue(line2 + " must contain loggerState", line2.contains("\"loggerState\":\"success\""));
     assertTrue(line2 + " must contain outcome", line2.contains("\"outcome\":\"success\""));
 
     verifyNoMoreInteractions(mockLogger);

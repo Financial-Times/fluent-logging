@@ -7,7 +7,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import com.ft.membership.logging.Key;
 import com.ft.membership.logging.Operation;
 import java.util.HashMap;
 import java.util.Map;
