@@ -116,6 +116,11 @@ logging.pattern.console=logLevel=\"%p\" time=\"%d{yyyy-MM-dd'T'HH:mm:ss.SSSz}\" 
 logging.pattern.file=logLevel=\"%p\" time=\"%d{yyyy-MM-dd'T'HH:mm:ss.SSSz}\" category=\"%c\" %m%n
 ```
 
+## Multi-threaded usage
+
+As `SimpleFluentLogger` uses [MDC](http://www.slf4j.org/manual.html#mdc). Every thread by default have different context. This means that if you start an `operation`, spawn a thread and that thread logs an action it would not have an operation. In order to fix that the application should explicitly set the MDC of the new thread. See the following [Stack Overflow Post](https://stackoverflow.com/questions/6073019/how-to-use-mdc-with-thread-pools) for implementation suggestions.
+
+
 ## Contributing
 - If you are within FT just talk to the Membership team. Otherwise please open issue in GitHub.
 - This project uses [google java format](https://github.com/google/google-java-format)
