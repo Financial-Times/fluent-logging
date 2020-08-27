@@ -1,3 +1,6 @@
+#4.0.1
+* Add new `.with(Object key, Object value)` method to `FluentLogger` that sets the key with `key.toString()`
+
 #4.0.0
 * Deprecate Operation, Failure, Yield, IntermediateYield
 * Introduce OperationContext and OperationState as abstract types for building fluent logs
