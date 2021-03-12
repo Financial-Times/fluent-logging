@@ -2,6 +2,7 @@ package com.ft.membership.logging;
 
 public enum Key {
   Result("result"),
+  ExceptionType("exceptionType"),
   ErrorMessage("errorMessage"),
   DebugMessage("debugMessage"),
   LoggerState("loggerState"),

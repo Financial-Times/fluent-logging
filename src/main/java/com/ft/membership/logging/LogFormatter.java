@@ -219,7 +219,7 @@ public class LogFormatter {
   }
 
   private String buildMsgJson(final Collection<NameAndValue> msgParams, String logLevel) {
-    addLogLevalAndTime(msgParams, logLevel);
+    addLogLevelAndTime(msgParams, logLevel);
     Map<String, Object> map = new HashMap<>();
     msgParams.stream()
         .forEach(
@@ -281,7 +281,7 @@ public class LogFormatter {
     }
   }
 
-  private void addLogLevalAndTime(final Collection<NameAndValue> msgParams, String logLevel) {
+  private void addLogLevelAndTime(final Collection<NameAndValue> msgParams, String logLevel) {
     msgParams.add(nameAndValue(LOG_LEVEL, logLevel));
     msgParams.add(
         nameAndValue(

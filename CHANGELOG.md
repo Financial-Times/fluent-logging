@@ -1,3 +1,7 @@
+#4.0.2
+* Log `exceptionType` field for `wasFailure(Exception e)` method.
+  Additionally log stack trace for NullPointer `wasFailure(Exception e)` (can be disabled with `disableNullPointerStackTrace`).
+
 #4.0.1
 * Add new `.with(Object key, Object value)` method to `FluentLogger` that sets the key with `key.toString()`
 
