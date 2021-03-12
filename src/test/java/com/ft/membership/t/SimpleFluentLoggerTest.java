@@ -158,10 +158,6 @@ public class SimpleFluentLoggerTest {
     assertFalse(
         "Null pointer should cause printStackTrace",
         out.contains("java.lang.NullPointerException"));
-    assertFalse(
-        "Null pointer should cause printStackTrace",
-        out.contains(
-            "at com.ft.membership.t.SimpleFluentLoggerTest.null_pointer_exception_failure_stack"));
   }
 
   @Test
