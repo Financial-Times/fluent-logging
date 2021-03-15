@@ -4,6 +4,7 @@ import static com.ft.membership.logging.FluentLogger.disableDefaultKeyValidation
 import static com.ft.membership.logging.SimpleFluentLogger.action;
 import static com.ft.membership.logging.SimpleFluentLogger.operation;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
@@ -16,6 +17,8 @@ import com.ft.membership.logging.KeyRegex;
 import com.ft.membership.logging.Layout;
 import com.ft.membership.logging.Preconditions.EmptyValueException;
 import com.ft.membership.logging.SimpleFluentLogger;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
 import org.junit.Before;
@@ -92,7 +95,7 @@ public class SimpleFluentLoggerTest {
     verify(mockLogger, times(1)).isErrorEnabled();
     verify(mockLogger)
         .error(
-            "operation=\"compound_success\" errorMessage=\"exception_failure_operation\""
+            "operation=\"compound_success\" exceptionType=\"java.lang.IllegalStateException\" errorMessage=\"exception_failure_operation\""
                 + " loggerState=\"fail\" outcome=\"failure\"");
     verifyNoMoreInteractions(mockLogger);
   }
@@ -111,6 +114,50 @@ public class SimpleFluentLoggerTest {
     verify(mockLogger)
         .info(
             "operation=\"getUserSubscriptions\" userId=\"1234\" activeSubscription=\"S-12345\" loggerState=\"success\" outcome=\"success\"");
+  }
+
+  @Test
+  public void null_pointer_exception_failure_stack() {
+    final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+    System.setOut(new PrintStream(outputStreamCaptor));
+
+    try {
+      Object a = null;
+      a.toString();
+    } catch (Exception exception) {
+      operation("null_pointer_exception_failure_stack", mockLogger).wasFailure(exception);
+    }
+
+    String out = outputStreamCaptor.toString();
+
+    assertTrue(
+        "Null pointer should cause printStackTrace",
+        out.contains("java.lang.NullPointerException"));
+    assertTrue(
+        "Null pointer should cause printStackTrace",
+        out.contains(
+            "at com.ft.membership.t.SimpleFluentLoggerTest.null_pointer_exception_failure_stack"));
+  }
+
+  @Test
+  public void no_null_pointer_exception_failure_stack_when_disabled() {
+    final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+    System.setOut(new PrintStream(outputStreamCaptor));
+
+    SimpleFluentLogger.disableNullPointerStackTrace();
+
+    try {
+      Object a = null;
+      a.toString();
+    } catch (Exception exception) {
+      operation("null_pointer_exception_failure_stack", mockLogger).wasFailure(exception);
+    }
+
+    String out = outputStreamCaptor.toString();
+
+    assertFalse(
+        "Null pointer should cause printStackTrace",
+        out.contains("java.lang.NullPointerException"));
   }
 
   @Test

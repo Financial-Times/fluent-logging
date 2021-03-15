@@ -34,6 +34,8 @@ public abstract class FluentLogger implements AutoCloseable {
    */
   private static Pattern defaultKeyRegexPattern;
 
+  private static boolean defaultPrintNullPointerStackTrace = true;
+
   private Layout layout = defaultLayout;
   private Pattern keyRegexPattern = defaultKeyRegexPattern;
 
@@ -65,6 +67,10 @@ public abstract class FluentLogger implements AutoCloseable {
 
   public static void changeDefaultKeyRegex(final KeyRegex keyRegex) {
     defaultKeyRegexPattern = Pattern.compile(keyRegex.getRegex());
+  }
+
+  public static void disableNullPointerStackTrace() {
+    defaultPrintNullPointerStackTrace = false;
   }
 
   public static void disableDefaultKeyValidation() {
@@ -157,6 +163,11 @@ public abstract class FluentLogger implements AutoCloseable {
   }
 
   public void wasFailure(final Exception e) {
+    if (defaultPrintNullPointerStackTrace && e instanceof NullPointerException) {
+      e.printStackTrace(System.out);
+    }
+
+    with(Key.ExceptionType, e.getClass().getName());
     with(Key.ErrorMessage, e.getMessage());
     state.fail(this);
     clear();
