@@ -37,7 +37,7 @@
 
     <groupId>com.ft.membership</groupId>
     <artifactId>fluent-logging</artifactId>
-    <version>4.0.2</version>
+    <version>4.0.3</version>
 
     <properties>
         <target-jdk>1.8</target-jdk>
