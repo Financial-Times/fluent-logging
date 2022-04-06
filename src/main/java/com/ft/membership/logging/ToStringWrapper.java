@@ -15,7 +15,7 @@ public class ToStringWrapper {
 
   @Override
   public String toString() {
-    if (value == null) return "null";
+    if (value == null || value.toString() == null) return "null";
     return "\"" + value.toString().replace("\"", "\\\"") + "\"";
   }
 
