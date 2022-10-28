@@ -162,7 +162,7 @@ public abstract class FluentLogger implements AutoCloseable {
     clear();
   }
 
-  public void wasFailure(final Exception e) {
+  public void wasFailure(final Throwable e) {
     if (defaultPrintNullPointerStackTrace && e instanceof NullPointerException) {
       e.printStackTrace(System.out);
     }
