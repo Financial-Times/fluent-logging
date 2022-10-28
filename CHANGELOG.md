@@ -1,3 +1,6 @@
+#4.0.4
+* Change `wasFailure(Exception e)` method to `wasFailure(Throwable e)` method. 
+
 #4.0.2
 * Log `exceptionType` field for `wasFailure(Exception e)` method.
   Additionally log stack trace for NullPointer `wasFailure(Exception e)` (can be disabled with `disableNullPointerStackTrace`).
