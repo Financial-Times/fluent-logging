@@ -24,14 +24,6 @@ release_only: &release_only
         - /v[0-9\.]+/
     branches:
       ignore: /.*/
-parameters:
-  image_version:
-    description: Builds and release to nexus
-    default: test
-    type: enum
-    enum:
-      - test
-      - stable
 jobs:
   mvn-build-release:
     docker:
