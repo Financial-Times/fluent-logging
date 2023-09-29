@@ -126,4 +126,4 @@ As `SimpleFluentLogger` uses [MDC](http://www.slf4j.org/manual.html#mdc). Every 
 - This project uses [google java format](https://github.com/google/google-java-format)
 
 ## Internal Release
-https://jenkins.memb.ft.com/job/fluent-logging/ 
+https://app.circleci.com/pipelines/github/Financial-Times/fluent-logging?branch=master 

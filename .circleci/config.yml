@@ -1,0 +1,47 @@
+version: 2.1
+orbs:
+  aws-cli: circleci/aws-cli@3.1.3
+  change-api: financial-times/change-api@0.25.1
+  jq: circleci/jq@2.2.0
+  kubernetes: circleci/kubernetes@0.12.1
+  node: circleci/node@5.0.0
+  slack: circleci/slack@4.1.1
+  snyk: snyk/snyk@1.1.2
+  ssh-over-ssm: financial-times/ssh-over-ssm@1.2.1
+
+master_only: &master_only
+  filters:
+    branches:
+      only:
+        - main
+        - master
+        - /^(?i)IH-.*/
+
+release_only: &release_only
+  filters:
+    tags:
+      only:
+        - /v[0-9\.]+/
+    branches:
+      ignore: /.*/
+jobs:
+  mvn-build-release:
+    docker:
+      - image: cimg/openjdk:8.0
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Mount settings.xml file
+          command: |
+            mkdir -p ~/.m2
+            echo $SETTINGS_XML_FILE > ~/.m2/settings.xml
+      - run: mvn com.coveo:fmt-maven-plugin:2.9:check
+      - run: mvn -s ~/.m2/settings.xml clean deploy -P ft-internal-release
+workflows: # a single workflow with a single job called mvn-build-release
+  version: 2.1
+  mvn-build-release-to-nexus:
+    jobs:
+      - mvn-build-release:
+          <<: *master_only
+          context: membership
